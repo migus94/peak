@@ -1,0 +1,20 @@
+#Node modules
+/node_modules
+/Front/node_modules
+/Back/node_modules
+
+# Builds
+/Front/dist
+/Back/build
+
+# Env files
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/project files
+.vscode/
+.idea/

@@ -1,0 +1,12 @@
+{
+    "name": "peak",
+    "private": "true",
+    "workspaces": [
+        "Front",
+        "Back"
+    ],
+    "scripts": {
+        "start:front": "npm --workspace Front start",
+        "start:back": "npm --workspace Back dev"
+    }
+}
