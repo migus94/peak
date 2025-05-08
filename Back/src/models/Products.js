@@ -9,6 +9,7 @@
  *         - descripcion
  *         - precio
  *         - imagenPrincipal
+ *         - stock
  *       properties:
  *         _id:
  *           type: string
@@ -33,6 +34,10 @@
  *           items:
  *             type: string
  *           description: URL de las imagenes del producto
+ *         stock:
+ *           type: number
+ *           description: Disponibilidad del producto
+ *           default: 0
  */
 
 const { Schema, model } = require('mongoose');
@@ -67,6 +72,12 @@ const productSchema = new Schema({
     imagenes: {
         type: [String],
         default: []
+    },
+    stock: {
+        type: number,
+        required: true,
+        default: 1000,
+        min: 0
     }
 });
 

@@ -99,28 +99,28 @@ router.get('/:id', authenticate, async (req, res) => {
  * @swagger
  * /api/products:
  *  post:
- *      summary: Crear un producto nuevo
- *      tags: 
- *        - Products
- *      security:
- *        - bearerAuth: []
- *      requestBody:
- *          required: true
- *          content:
- *              application/json:
- *                  schema:
- *                      $ref: '#/components/schemas/Products'
- *      responses:
- *          "201":
- *              description: Producto creado
- *              content: 
- *                  application/json:
- *                      schema:
- *                          $ref: '#/components/schemas/Products'
- *          "401":
- *            description: No autenticado
- *          "403":
- *            description: No autorizado
+ *    summary: Crear un producto nuevo
+ *    tags: 
+ *      - Products
+ *    security:
+ *      - bearerAuth: []
+ *    requestBody:
+ *      required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Products'
+ *    responses:
+ *      "201":
+ *        description: Producto creado
+ *          content: 
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Products'
+ *      "401":
+ *        description: No autenticado
+ *      "403":
+ *        description: No autorizado
  */
 router.post('/', authenticate, authorize('ADMIN'), async (req, res) => {
     // TODO implementar
@@ -226,7 +226,7 @@ router.delete('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Products'
-  *      "401":
+ *       "401":
  *         description: No autenticado
  *       "403":
  *         description: No autorizado
