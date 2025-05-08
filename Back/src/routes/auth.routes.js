@@ -75,7 +75,7 @@ const User = require('../models/User');
 
 /**
  * @swagger
- * /api/auth/singup:
+ * /api/auth/signup:
  *   post:
  *     summary: Registrar usuario nuevo
  *     tags:
@@ -94,12 +94,12 @@ const User = require('../models/User');
  *       "500":
  *         description: Error de servidor
  */
-router.post('/singup', requiredFields(['nombre', 'email', 'password']), async (req, res) => {
+router.post('/signup', requiredFields(['nombre', 'email', 'password']), async (req, res) => {
     try {
         const { nombre, email, password } = req.body;
         if (await User.exists({ email })) {
             return res.status(400).json({ message: 'El email ya esta en uso' });
-        }
+        };
 
         const passwordHash = await bcrypt.hash(password, parseInt(process.env.HASH_ITERATIONS, 10) || 10);
         const newUser = await User.create({ nombre, email, passwordHash });
@@ -112,7 +112,7 @@ router.post('/singup', requiredFields(['nombre', 'email', 'password']), async (r
             rol: newUser.rol
         });
     } catch (e) {
-        console.error('Error al singup', e);
+        console.error('Error al signup', e);
         return res.status(500).json({ message: 'Error de servidor' });
     }
 });
@@ -137,12 +137,31 @@ router.post('/singup', requiredFields(['nombre', 'email', 'password']), async (r
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AuthResponse'
+ *       "400":
+ *         description: Informacion incompleta
  *       "401":
- *         description: Datos invalidos
+ *         description: Login invalido
+ *       "500":
+ *         description: Errror de servidor
  */
-router.post('/login', async (req, res) => {
-    //TO DO login 
-    res.json({ token: 'xxxx' });
+router.post('/login', requiredFields(['email', 'password']), async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email: email ? email.toLowerCase() : email });
+        const match = await bcrypt.compare(password, user.passwordHash);
+
+        if (!user || !match) return res.status(401).json({ error: 'Datos no validos' });
+
+        const payload = { sub: user.id, roles: user.rol };
+        // TODO probar los tiempo de los tokens (expiresIn 1m)
+        const accessToken = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '45m' });
+        const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_KEY, { expiresIn: '2h' });
+
+        return res.json({ accessToken, refreshToken });
+    } catch (e) {
+        console.error('Error en login', e);
+        return res.status(500).json({ message: 'Error de servidor' })
+    }
 });
 
 /**
