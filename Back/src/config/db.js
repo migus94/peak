@@ -1,16 +1,8 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = process.env.MONGODB_URI;
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
+const mongoose = require('mongoose');
 
 async function connectDB() {
     try {
-        await client.connect();
+        await mongoose.connect(process.env.MONGODB_URI);
         console.log('conexion a atlas');
     } catch (error) {
         console.error('fallo de conexion: ', err);
@@ -18,4 +10,4 @@ async function connectDB() {
     }
 };
 
-module.exports = { connectDB, client }
+module.exports = { connectDB }

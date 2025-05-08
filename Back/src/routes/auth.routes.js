@@ -68,6 +68,8 @@
 const express = require('express');
 const router = express.Router();
 
+const { requiredFields } = require('../middlewares/validation.middleware');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
@@ -89,12 +91,30 @@ const User = require('../models/User');
  *         description: Usuario creado
  *       "400":
  *         description: Datos invalidos o usuario ya existente
+ *       "500":
+ *         description: Error de servidor
  */
-router.post('/singup', async (req, res) => {
+router.post('/singup', requiredFields(['nombre', 'email', 'password']), async (req, res) => {
+    try {
+        const { nombre, email, password } = req.body;
+        if (await User.exists({ email })) {
+            return res.status(400).json({ message: 'El email ya esta en uso' });
+        }
 
-    //TO DO logica de singup
+        const passwordHash = await bcrypt.hash(password, parseInt(process.env.HASH_ITERATIONS, 10) || 10);
+        const newUser = await User.create({ nombre, email, passwordHash });
 
-    res.status(201).json({ message: 'Created new user' });
+        return res.status(201).json({
+            message: 'Created new user',
+            id: newUser._id,
+            nombre: newUser.nombre,
+            email: newUser.email,
+            rol: newUser.rol
+        });
+    } catch (e) {
+        console.error('Error al singup', e);
+        return res.status(500).json({ message: 'Error de servidor' });
+    }
 });
 
 /**
