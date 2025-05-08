@@ -276,7 +276,7 @@ router.get('/me', authenticate, async (req, res) => {
 
 /**
  * @swagger
- * /api/users/{id}/role:s
+ * /api/users/{id}/role:
  *   patch:
  *     summary: Cambiar rol de usuario
  *     tags: 
