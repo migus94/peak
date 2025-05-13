@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 
 function authenticate(req, res, next) {
-    const authHeader = req.headers.autorization;
+    console.log('Autenticando...', req.headers);
+    const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
         return res.status(401).json({ error: 'Token faltante' });
     }
@@ -9,7 +10,12 @@ function authenticate(req, res, next) {
     try {
         const payload = jwt.verify(token, process.env.JWT_KEY);
         req.userId = payload.sub;
-        req.userRoles = payload.roles || [];
+        const roles = payload.roles;
+        req.userRoles = Array.isArray(roles)
+            ? roles
+            : roles
+                ? [roles]
+                : [];
         next();
     } catch (err) {
         return res.status(401).json({ error: 'Token no valido' });
@@ -18,12 +24,12 @@ function authenticate(req, res, next) {
 
 function authorize(...allowedRoles) {
     return (req, res, next) => {
-        if (!req.userRoles) {
-            return res.status(403).json({ error: 'No autenticado' });
+        if (!req.userRoles.length) {
+            return res.status(403).json({ error: 'No autorizado' });
         }
         const hasRole = req.userRoles.some(x => allowedRoles.includes(x));
         if (!hasRole) {
-            return res.status(403).json({ error: 'Rol no permitido' });
+            return res.status(403).json({ error: 'Rol no autorizado' });
         }
         next();
     }

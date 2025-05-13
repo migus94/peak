@@ -5,17 +5,13 @@
  *     description: Gestión de usuarios
  */
 
+const { validateInt } = require('../middlewares/validation.middleware');
+const { authenticate, authorize } = require('../middlewares/auth.middleware');
 
 const express = require('express');
 const router = express.Router();
-
-const { authenticate, authorize } = require('../middlewares/auth.middleware');
-const user = require('../models/User');
-const jwt = require('jsonwebtoken');
-
-//TODO en principio todos los endpoint ADMIN
-
-
+const bcrypt = require('bcrypt');
+const User = require('../models/User');
 
 /**
  * @swagger
@@ -26,6 +22,12 @@ const jwt = require('jsonwebtoken');
  *       - Users
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Filtra usuarios por nombre
  *     responses:
  *       "200":
  *         description: Lista de usuarios
@@ -35,14 +37,65 @@ const jwt = require('jsonwebtoken');
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/User'
+ *       "401":
+ *         description: Token faltante
+ *       "403": 
+ *         description: No autorizado
+ *       "500":
+ *         description: Error de servidor
  */
-router.get('/', async (req, res) => {
+router.get('/', authenticate, authorize('ADMIN'), async (req, res) => {
+    try {
+        const { name } = req.query;
+        const filter = {};
 
-    // TODO filtros
-    // const filters = req.query; 
-    //const users = await Users.find(filters)
+        if (name) {
+            filter.name = { $regex: name, $options: 'i' };
+        }
 
-    res.json({});
+        const users = await user.find(filter).select('-passwordHash');
+        return res.json(users)
+
+    } catch (e) {
+        console.log("Error al listar usuarios ", e);
+        return res.status(500).json({ message: "Error de servidor" });
+    }
+});
+
+/**
+ * @swagger
+ * /api/users/me:
+ *   get:
+ *     summary: Mostrar datos del usuario autenticado
+ *     tags: 
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       "200":
+ *         description: Datos del usuario autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       "401":
+ *         description: Token faltante
+ *       "404":
+ *         description: Usuario no encontrado 
+ *       "500":
+ *         description: Error de servidor
+ */
+router.get('/me', authenticate, async (req, res) => {
+    try {
+        const me = await User.findById(req.userId).select('-passwordHash');
+        if (!me) {
+            return res.status(404).json({ message: `Usuario no encontrado` });
+        }
+        return res.json(me);
+    } catch (e) {
+        console.error('Error al obtener datos de usuario autenticado', e);
+        return res.status(500).json({ message: 'Error de servidor' });
+    }
 });
 
 /**
@@ -59,8 +112,8 @@ router.get('/', async (req, res) => {
  *         name: id
  *         required: true
  *         schema:
- *           type: string
- *         description: Id del usuario 
+ *           type: integer
+ *         description: Id publico del usuario 
  *     responses:
  *       "200":
  *         description: Datos del usuario
@@ -68,47 +121,28 @@ router.get('/', async (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/User'
+ *       "400":
+ *         description: Id invalido
+ *       "401":
+ *         description: Token faltante
+ *       "403": 
+ *         description: No autorizado
  *       "404":
  *         description: Usuario no encontrado
+ *       "500":
+ *         description: Error de servidor
  */
-router.get('/:id', async (req, res) => {
-    const { id } = req.params
-    res.json({});
-});
-
-/**
- * @swagger
- * /api/users:
- *   post:
- *     summary: Crear usuario nuevo
- *     tags: 
- *       - Users
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/NewUser'
- *     responses:
- *       "201":
- *         description: Usuario creado correctamente
- *         content: 
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       "400":
- *         description: Datos no validos o insuficientes
- *       "401":
- *         description: No autenticado
- *       "403":
- *         description: No autorizado
- */
-// solo para pruebas, se deben generar usuarios al registraste
-router.post('/', authenticate, authorize('ADMIN'), async (req, res) => {
-    // TODO logica de creacion 
-    res.status(201).json({});
+router.get('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async (req, res) => {
+    try {
+        const publicId = req.params.id
+        const user = await User.findOne({ publicId }).select('-passwordHash');
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+        return res.json(user);
+    } catch (e) {
+        return res.status(500).json({ message: "Error de servidor" });
+    }
 });
 
 /**
@@ -125,8 +159,8 @@ router.post('/', authenticate, authorize('ADMIN'), async (req, res) => {
  *         name: id
  *         required: true
  *         schema:
- *           type: string
- *         description: Id del usuario editado
+ *           type: integer
+ *         description: Id publico del usuario editado
  *     requestBody:
  *       required: true
  *       content:
@@ -134,7 +168,7 @@ router.post('/', authenticate, authorize('ADMIN'), async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               nombre:
+ *               name:
  *                 type: string
  *               email:
  *                 type: string
@@ -154,16 +188,47 @@ router.post('/', authenticate, authorize('ADMIN'), async (req, res) => {
  *       "400":
  *         description: Datos no validos o insuficientes
  *       "401":
- *         description: No autenticado
+ *         description: Token faltante
  *       "403":
  *         description: No autorizado
  *       "404": 
  *         description: Usuario no encontrado
+ *       "500":
+ *         description: Error de servidor
  */
-router.put('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
-    const { id } = req.params
-    // TODO logica edicion
-    res.json({});
+router.put('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async (req, res) => {
+    const publicId = req.params.id;
+
+    try {
+        const foundUser = await User.findOne({ publicId });
+        if (!foundUser) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        const updatable = ['name', 'email', 'rol'];
+        const updates = updatable.reduce((updatedObject, key) => {
+            const value = req.body[key]
+            if (value) { // != null
+                const parsedValue = key === 'email'
+                    ? String(value).toLowerCase().trim()
+                    : String(value).trim();
+                if (parsedValue !== foundUser[key]) {
+                    updatedObject[key] = parsedValue;
+                }
+            }
+            return updatedObject;
+        }, {});
+
+        if (Object.keys(updates).length === 0) {
+            return res.status(200).json({ message: 'No se detectaron cambios', user: foundUser });
+        }
+        const updatedUser = await User
+            .findOneAndUpdate({ publicId }, updates, { new: true }).select('-passwordHash');
+        return res.json(updatedUser);
+    } catch (e) {
+        console.error(`Error al actualizar usuario ${publicId}`, e);
+        return res.status(500).json({ message: 'Error de servidor' });
+    };
 });
 
 /**
@@ -180,23 +245,33 @@ router.put('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
  *         name: id
  *         required: true
  *         schema:
- *           type: string
- *         description: Id del usuario eliminado
+ *           type: integer
+ *         description: Id publico del usuario eliminado
  *     responses:
  *       "204":
  *         description: Usuario eliminado
  *       "401":
- *         description: No autenticado
+ *         description: Token faltante
  *       "403":
  *         description: No autorizado
  *       "404": 
  *         description: Usuario no encontrado
+ *       "500":
+ *         description: Error de servidor
  */
 // valorar si para otros usuarios
-router.delete('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
-    const { id } = req.params
-    // TODO logica eliminacion
-    res.status(204).end();
+router.delete('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async (req, res) => {
+    const publicId = req.params.id;
+    try {
+        const userDeleted = await User.findOneAndDelete({ publicId });
+        if (!userDeleted) {
+            return res.status(404).json({ message: `Usuario ${publicId} no encontrado` });
+        }
+        return res.status(204).end();
+    } catch (e) {
+        console.error(`Error al eliminar usuario ${publicId}`, e);
+        return res.status(500).json({ message: 'Error de servidor' });
+    }
 });
 
 /**
@@ -213,8 +288,8 @@ router.delete('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
  *         name: id
  *         required: true
  *         schema:
- *           type: string
- *         description: Id del usuario
+ *           type: integer
+ *         description: Id publico del usuario
  *     requestBody:
  *       required: true
  *       content:
@@ -237,48 +312,47 @@ router.delete('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
  *       "400":
  *         description: Datos no validos o incorrectos
  *       "401":
- *         description: No autenticado
- *       "403":
- *         description: No autorizado
+ *         description: Token faltante
  *       "404": 
  *         description: Usuario no encontrado
+ *       "500":
+ *         description: Error de servidor
  */
-router.patch('/:id/password', authenticate, async (req, res) => {
-    const { id } = req.params
+router.patch('/:id/password', validateInt('id'), authenticate, async (req, res) => {
+    const publicId = req.params.id;
     const { oldPassword, newPassword } = req.body;
-    // TODO logica de cambio de contraseña
-    res.json({ mesagge: 'Contraseña actualizada' });
+
+    if (!oldPassword || !newPassword) {
+        return res.status(400).json({ message: 'Contraseña nueva y antigua requerida' });
+    }
+
+    try {
+        const user = await User.findOne({ publicId });
+        if (!user) {
+            return res.status(404).json({ message: `Usuario ${publicId} no encontrado` });
+        }
+
+        const match = await bcrypt.compare(oldPassword, user.passwordHash);
+        if (!match) {
+            return res.status(400).json({ message: `Contraseña incorrecta` });
+        }
+
+        user.passwordHash = await bcrypt
+            .hash(newPassword, parseInt(process.env.HASH_ITERATIONS, 10) || 10);
+        await user.save();
+        return res.json({ message: 'Contraseña actualizada' });
+
+    } catch (e) {
+        console.error(`Error al cambiar contraseña de usuario ${publicId}`, e);
+        return res.status(500).json({ message: 'Error de servidor' });
+    }
 });
 
 /**
  * @swagger
- * /api/users/me:
- *   get:
- *     summary: Mostrar datos del usuario autenticado
- *     tags: 
- *       - Users
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       "200":
- *         description: Datos del usuario autenticado
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       "401":
- *         description: No autenticado
- */
-router.get('/me', authenticate, async (req, res) => {
-    const me = await user.findById(req.userId).select('-passwordHash');
-    res.json(me);
-});
-
-/**
- * @swagger
- * /api/users/{id}/role:
+ * /api/users/{id}/rol:
  *   patch:
- *     summary: Cambiar rol de usuario
+ *     summary: Cambiar rol de un usuario
  *     tags: 
  *       - Users
  *     security:
@@ -288,22 +362,8 @@ router.get('/me', authenticate, async (req, res) => {
  *         name: id
  *         required: true
  *         schema:
- *           type: string
- *         description: Id del usuario
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - role
- *             properties:
- *               role:
- *                 type: string
- *                 enum:
- *                   - USER
- *                   - ADMIN
+ *           type: integer
+ *         description: Id publico del usuario
  *     responses:
  *       "200":
  *         description: Rol actualizado
@@ -311,22 +371,34 @@ router.get('/me', authenticate, async (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/User'
- *       "400":
- *         description: Datos no validos o incorrectos
  *       "401":
- *         description: No autenticado
+ *         description: Token faltante
  *       "403":
  *         description: No autorizado
  *       "404": 
  *         description: Usuario no encontrado
+ *       "500":
+ *         description: Error de servidor
  */
-router.patch('/:id/role', authenticate, authorize('ADMIN'), async (req, res) => {
-    const { id } = req.params;
-    const { role } = req.body;
-    //TODO validar role y actualizar
-    const updated = await UserActivation.findIdAndUpdate(id, { role: role }, { new: true })
-        .select('-passwordhash');
-    res.json(updated);
+router.patch('/:id/rol', validateInt('id'), authenticate, authorize('ADMIN'), async (req, res) => {
+    const publicId = req.params.id;
+
+    try {
+        const updatedUser = await User.findOne({ publicId }).select('-passwordHash');
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        const newRol = updatedUser.rol === 'USER' ? 'ADMIN' : 'USER';
+        updatedUser.rol = newRol;
+
+        await updatedUser.save();
+        return res.json(updatedUser);
+    } catch (e) {
+        console.error(`Error al cambiar el rol del usuario ${publicId}`, e);
+        return res.status(500).json({ message: 'Error de servidor' });
+    }
 });
 
 module.exports = router;

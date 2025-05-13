@@ -49,7 +49,7 @@ const products = require('../models/Products');
  *               items:
  *                 $ref: '#/components/schemas/Products'
  *       "401":
- *         description: No autenticado
+ *         description: Token faltante
  */
 router.get('/', authenticate, async (req, res) => {
     //const filters = req.query; 
@@ -82,7 +82,7 @@ router.get('/', authenticate, async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Products'
  *       "401":
- *         description: No autenticado
+ *         description: Token faltante
  *       "404":
  *         description: Producto no encontrado
  */
@@ -118,7 +118,7 @@ router.get('/:id', authenticate, async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Products'
  *       "401":
- *         description: No autenticado
+ *         description: Token faltante
  *       "403":
  *         description: No autorizado
  */
@@ -159,7 +159,7 @@ router.post('/', authenticate, authorize('ADMIN'), async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Products'
  *       "401":
- *         description: No autenticado
+ *         description: Token faltante
  *       "403":
  *         description: No autorizado
  *       "404":
@@ -191,7 +191,7 @@ router.put('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
  *       "204":
  *         description: Producto eliminado
  *       "401":
- *         description: No autenticado
+ *         description: Token faltante
  *       "403":
  *         description: No autorizado
  *       "404":
@@ -227,7 +227,7 @@ router.delete('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Products'
  *       "401":
- *         description: No autenticado
+ *         description: Token faltante
  *       "403":
  *         description: No autorizado
  *       "404":
