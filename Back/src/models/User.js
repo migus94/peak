@@ -5,11 +5,11 @@
  *     NewUser:
  *       type: object
  *       required:
- *         - nombre
+ *         - name
  *         - email
  *         - password
  *       properties:
- *         nombre: 
+ *         name: 
  *           type: string
  *           description: Nombre completo del usuario
  *         email:
@@ -21,7 +21,6 @@
  *           descripcion: Contraseña en texto (Se obtiene el Hash postetiormente)
  */
 
-
 /**
  * @swagger
  * components:
@@ -29,14 +28,15 @@
  *     User:
  *       type: object
  *       required:
- *         - nombre
+ *         - publicId
+ *         - name
  *         - email
  *         - passwordHash
  *       properties:
- *         _id:
- *           type: string
- *           description: Id generado por MongoDB
- *         nombre: 
+ *         publocId:
+ *           type: number
+ *           description: Id publico incremental de usuario
+ *         name: 
  *           type: string
  *           description: Nombre de usuario
  *         email:
@@ -46,6 +46,9 @@
  *         passwordHash:
  *           type: string
  *           description: hash de la contraseña
+ *         _id:
+ *           type: string
+ *           description: Id generado por MongoDB
  *         rol:
  *           type: string
  *           enum:
@@ -55,9 +58,14 @@
  */
 
 const { Schema, model } = require('mongoose');
+const Counter = require('../models/Counter');
 
 const userSchema = new Schema({
-    nombre: {
+    publicId: {
+        type: Number,
+        unique: true
+    },
+    name: {
         type: String,
         required: true,
         trim: true
@@ -78,6 +86,18 @@ const userSchema = new Schema({
         enum: ['USER', 'ADMIN'],
         default: 'USER'
     }
+});
+
+userSchema.pre('save', async function (next) {
+    if (this.isNew) {
+        const counter = await Counter.findOneAndUpdate(
+            { name: 'User' },
+            { $inc: { seq: 1 } },
+            { new: true, upsert: true }
+        );
+        this.publicId = counter.seq;
+    }
+    next();
 });
 
 module.exports = model('User', userSchema);

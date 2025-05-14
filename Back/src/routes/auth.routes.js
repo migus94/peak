@@ -9,11 +9,11 @@
  *     NewUser:
  *       type: object
  *       required:
- *         - nombre
+ *         - name
  *         - email
  *         - password
  *       properties:
- *         nombre:
+ *         name:
  *           type: string
  *           description: Nombre completo del usuario
  *         email:
@@ -94,20 +94,20 @@ const User = require('../models/User');
  *       "500":
  *         description: Error de servidor
  */
-router.post('/signup', requiredFields(['nombre', 'email', 'password']), async (req, res) => {
+router.post('/signup', requiredFields(['name', 'email', 'password']), async (req, res) => {
     try {
-        const { nombre, email, password } = req.body;
+        const { name, email, password } = req.body;
         if (await User.exists({ email })) {
             return res.status(400).json({ message: 'El email ya esta en uso' });
         };
 
         const passwordHash = await bcrypt.hash(password, parseInt(process.env.HASH_ITERATIONS, 10) || 10);
-        const newUser = await User.create({ nombre, email, passwordHash });
+        const newUser = await User.create({ name, email, passwordHash });
 
         return res.status(201).json({
             message: 'Created new user',
             id: newUser._id,
-            nombre: newUser.nombre,
+            name: newUser.name,
             email: newUser.email,
             rol: newUser.rol
         });
@@ -148,15 +148,15 @@ router.post('/login', requiredFields(['email', 'password']), async (req, res) =>
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email: email ? email.toLowerCase() : email });
-        const match = await bcrypt.compare(password, user.passwordHash);
+        if (!user) return res.status(401).json({ error: 'Datos no validos' });
 
-        if (!user || !match) return res.status(401).json({ error: 'Datos no validos' });
+        const match = await bcrypt.compare(password, user.passwordHash);
+        if (!match) return res.status(401).json({ error: 'Datos no validos' });
 
         const payload = { sub: user.id, roles: user.rol };
         // TODO probar los tiempo de los tokens (expiresIn 1m)
         const accessToken = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '45m' });
         const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_KEY, { expiresIn: '2h' });
-
         return res.json({ accessToken, refreshToken });
     } catch (e) {
         console.error('Error en login', e);
@@ -185,24 +185,30 @@ router.post('/login', requiredFields(['email', 'password']), async (req, res) =>
  *             schema:
  *               $ref: '#/components/schemas/RefreshResponse'
  *       "400":
- *         description: Token faltante
+ *         description: Token de refresco faltante
  *       "401":
  *         description: Token invalido 
+ *       "500":
+ *         description: Error de servidor
  */
-router.post('/refresh', async (req, res) => {
+router.post('/refresh', requiredFields(['refreshToken']), async (req, res) => {
     const { refreshToken } = req.body;
-    if (!refreshToken) return res.status(400).json({ error: 'Falta token' });
-
     try {
-        const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN);
+        const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_KEY);
         const accesToken = jwt.sign(
             { sub: payload.sub, roles: payload.roles },
             process.env.JWT_KEY,
             { expiresIn: '45m' }
         );
         res.json({ accesToken });
-    } catch (err) {
-        res.status(401).json({ error: 'Token invalido' });
+    } catch (e) {
+        if (e.name === 'JsonWebTokenError' || e.name === 'TokenExpiredError') {
+            res.status(401).json({ error: 'Token invalido' });
+        }
+        else {
+            console.error('Error al refrescar token', e);
+            res.status(500).json({ error: 'Error de servidor' });
+        };
     }
 });
 

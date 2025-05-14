@@ -5,12 +5,16 @@
  *     Products:
  *       type: object
  *       required:
+ *         - publicId
  *         - titulo
  *         - descripcion
  *         - precio
  *         - imagenPrincipal
  *         - stock
  *       properties:
+ *         publocId:
+ *           type: number
+ *           description: Id publico incremental de producto
  *         _id:
  *           type: string
  *           description: Id generado por MongoDB
@@ -41,8 +45,13 @@
  */
 
 const { Schema, model } = require('mongoose');
+const Counter = require('../models/Counter');
 
 const productSchema = new Schema({
+    publicId: {
+        type: Number,
+        unique: true
+    },
     titulo: {
         type: String,
         required: true,
@@ -84,6 +93,18 @@ const productSchema = new Schema({
 productSchema.index({
     titulo: 'text',
     descripcion: 'text'
+});
+
+productSchema.pre('save', async function (next) {
+    if (this.isNew) {
+        const counter = await Counter.findOneAndUpdate(
+            { name: 'Product' },
+            { $inc: { seq: 1 } },
+            { new: true, upsert: true }
+        );
+        this.publicId = counter.seq;
+    }
+    next();
 });
 
 module.exports = model('Products', productSchema);
