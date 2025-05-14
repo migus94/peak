@@ -88,6 +88,14 @@ const userSchema = new Schema({
     }
 });
 
+userSchema.set('toJSON', {
+    versionKey: false,
+    transform: (_doc, ret) => {
+        delete ret._id;
+        return ret;
+    }
+});
+
 userSchema.pre('save', async function (next) {
     if (this.isNew) {
         const counter = await Counter.findOneAndUpdate(

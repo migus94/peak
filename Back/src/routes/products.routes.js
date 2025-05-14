@@ -5,14 +5,12 @@
  *     description: Gestión de productos
  */
 
+const { requiredFields, validateInt } = require('../middlewares/validation.middleware');
+const { authenticate, authorize } = require('../middlewares/auth.middleware');
+
 const express = require('express');
 const router = express.Router();
-const { authenticate, authorize } = require('../middlewares/auth.middleware');
-const products = require('../models/Products');
-
-// Metodos para administrador
-
-//TODO comprobar que llamadas tienen req o res (tambien en auth y en )
+const Product = require('../models/Products');
 
 /**
  * @swagger
@@ -24,6 +22,11 @@ const products = require('../models/Products');
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Texto a buscar
  *       - in: query
  *         name: minPrice
  *         schema:
@@ -50,19 +53,62 @@ const products = require('../models/Products');
  *                 $ref: '#/components/schemas/Products'
  *       "401":
  *         description: Token faltante
+ *       "500":
+ *         description: Error de servidor
  */
 router.get('/', authenticate, async (req, res) => {
-    //const filters = req.query; 
-    //const productos = await Product.find(filters)
+    const { search, minPrice, maxPrice, minRating } = req.query;
+    const filters = {};
 
-    res.json({});
+    if (search) {
+        const text = String(search);
+
+        filters.$or = [
+            { title: { $regex: text, $options: 'i' } },
+            { description: { $regex: text, $options: 'i' } }
+        ];
+    }
+
+    if (minPrice !== null) {
+        const min = parseFloat(minPrice);
+        if (!Number.isNaN(min)) {
+            filters.price = { ...(filters.price || {}), $gte: min };
+        }
+    }
+    if (maxPrice !== null) {
+        const max = parseFloat(maxPrice);
+        if (!Number.isNaN(max)) {
+            filters.price = { ...(filters.price || {}), $lte: max };
+        }
+    }
+
+    if (minRating !== null) {
+        const rat = parseFloat(minRating);
+        if (!Number.isNaN(rat)) {
+            filters.rating = { $gte: rat };
+        }
+    }
+
+    try {
+        let query = Product.find(filters);
+        if (filters.$text) {
+            query = query
+                .select({ score: { $meta: 'textScore' } })
+                .sort({ score: { $meta: 'textScore' } });
+        }
+        const items = await query.exec();
+        return res.json(items);
+    } catch (e) {
+        console.error('Error al obtener lista de productos', e);
+        return res.status(500).json({ message: 'Error de servidor' });
+    }
 });
 
 /**
  * @swagger
  * /api/products/{id}:
  *   get:
- *     summary: Obtener un producto por su Id
+ *     summary: Obtener un producto por su Id publico
  *     tags: 
  *       - Products
  *     security:
@@ -72,26 +118,37 @@ router.get('/', authenticate, async (req, res) => {
  *         name: id
  *         required: true
  *         schema:
- *           type: string
- *         description: Id del producto
+ *           type: integer
+ *         description: Id publico del producto
  *     responses:
  *       "200":
- *         description: detalles del producto
+ *         description: Detalles del producto
  *         content: 
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Products'
+ *       "400":
+ *         description: Formato de id no valido
  *       "401":
  *         description: Token faltante
  *       "404":
  *         description: Producto no encontrado
+ *       "500":
+ *         description: Error de servidor
  */
-router.get('/:id', authenticate, async (req, res) => {
-    const { id } = req.params
-    // const filters = req.query; 
-    //const productos = await Product.find(filters)
+router.get('/:id', validateInt('id'), authenticate, async (req, res) => {
+    const publicId = req.params.id;
 
-    res.json({});
+    try {
+        const item = await Product.findOne({ publicId });
+        if (!item) {
+            return res.status(404).json({ message: 'Producto no encontrado' });
+        }
+        return res.json(item);
+    } catch (e) {
+        console.error(`Error al obtener el producto ${publicId}`, e);
+        return res.status(500).json({ message: 'Error de servidor' });
+    }
 });
 
 
@@ -109,7 +166,28 @@ router.get('/:id', authenticate, async (req, res) => {
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Products'
+ *             type: object
+ *             required:
+ *               - title
+ *               - description
+ *               - price
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               rating:
+ *                 type: number
+ *               mianImage:
+ *                 type: string
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               stock:
+ *                 type: integer
  *     responses:
  *       "201":
  *         description: Producto creado
@@ -117,16 +195,43 @@ router.get('/:id', authenticate, async (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Products'
+ *       "400":
+ *         description: datos invalidos o insuficientes
  *       "401":
  *         description: Token faltante
  *       "403":
  *         description: No autorizado
+ *       "500":
+ *         description: Error de servidor
  */
-router.post('/', authenticate, authorize('ADMIN'), async (req, res) => {
-    // TODO implementar
+router.post(
+    '/',
+    authenticate,
+    authorize('ADMIN'),
+    requiredFields(['title', 'description', 'price']),
+    async (req, res) => {
+        try {
+            const { title, description, price, rating = 0, mainImage, images = [], stock } = req.body;
+            const newProduct = new Product({
+                title: title.trim(),
+                description: description.trim(),
+                price,
+                rating,
+                mainImage: (mainImage || 'DEFAULT').trim(),
+                images,
+                stock: typeof stock === 'number' ? stock : 0
+            });
 
-    res.status(201).json({});
-});
+            await newProduct.save();
+            return res.status(201).json(newProduct);
+        } catch (e) {
+            console.error('Error creando el producto', e);
+            if (e.name === 'ValidationError') {
+                return res.status(400).json({ message: 'Datos invalidos' });
+            }
+            return res.status(500).json({ message: 'Error de servidor' });
+        }
+    });
 
 
 /**
@@ -144,13 +249,30 @@ router.post('/', authenticate, authorize('ADMIN'), async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
- *         description: Id del procucto a editar
+ *         description: Id publico del procucto a editar
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Products'  
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               rating:
+ *                 type: number
+ *               mainImage:
+ *                 type: string
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               stock:
+ *                 type: integer
  *     responses:
  *       "200":
  *         description: Producto actualizado
@@ -158,17 +280,73 @@ router.post('/', authenticate, authorize('ADMIN'), async (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Products'
+ *       "400":
+ *         description: Datos invalidos
  *       "401":
  *         description: Token faltante
  *       "403":
  *         description: No autorizado
  *       "404":
  *         description: Producto no encontrado
+ *       "500":
+ *         description: Error de servidor
  */
 router.put('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
-    const { id } = req.params
-    // TODO implementar logica de edicion
-    res.json({});
+    const publicId = req.params.id
+    try {
+        const item = await Product.findOne({ publicId });
+        if (!item) {
+            return res.status(404).json({ message: 'producto no encontrado' })
+        };
+
+        const fields = ['title', 'description', 'price', 'rating', 'mainImage', 'images', 'stock'];
+        const updates = fields.reduce((updatedObject, key) => {
+            let newValue = req.body[key];
+            if (newValue === undefined) {
+                return updatedObject;
+            }
+
+            if (typeof newValue === 'string') {
+                newValue = newValue.trim();
+            }
+
+            const currentValue = item[key];
+
+            if (Array.isArray(currentValue) && Array.isArray(newValue)) {
+                const diferent =
+                    newValue.length !== currentValue.length ||
+                    newValue.some((el, i) => el !== currentValue[i]);
+                if (diferent) {
+                    updatedObject[key] = newValue;
+                }
+            } else {
+                if (newValue !== currentValue) {
+                    updatedObject[key] = newValue;
+                }
+            }
+
+            return updatedObject;
+        }, {});
+
+        if (Object.keys(updates).length === 0) {
+            return res.status(200).json({ message: 'No se detectaron cambios', product: item })
+        }
+
+        const updatedItem = await Product.findOneAndUpdate(
+            { publicId },
+            updates,
+            { new: true }
+        );
+
+        return res.status(200).json(updatedItem);
+
+    } catch (e) {
+        console.error('Error editando el producto', e);
+        if (e.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Datos invalidos' });
+        }
+        return res.status(500).json({ message: 'Error de servidor' });
+    }
 });
 
 /**

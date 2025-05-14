@@ -205,11 +205,11 @@ router.put('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async (r
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        const updatable = ['name', 'email', 'rol'];
-        const updates = updatable.reduce((updatedObject, key) => {
+        const fields = ['name', 'email', 'rol'];
+        const updates = fields.reduce((updatedObject, key) => {
             const value = req.body[key]
             if (value) { // != null
-                const parsedValue = key === 'email'
+                const parsedValue = (key === 'email')
                     ? String(value).toLowerCase().trim()
                     : String(value).trim();
                 if (parsedValue !== foundUser[key]) {

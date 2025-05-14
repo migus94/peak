@@ -33,6 +33,7 @@
  *         imagenPrincipal:
  *           type: string
  *           description: URL de la imagen principal del producto
+ *           default: 'DEFAULT'
  *         imagenes:
  *           type: array
  *           items:
@@ -52,47 +53,54 @@ const productSchema = new Schema({
         type: Number,
         unique: true
     },
-    titulo: {
+    title: {
         type: String,
         required: true,
         trim: true
     },
-    descripcion: {
+    description: {
         type: String,
         required: true,
         trim: true
     },
-    precio: {
+    price: {
         type: Number,
         required: true,
         min: 0
     },
-    valoracion: {
+    rating: {
         type: Number,
         default: 0,
         min: 0,
         max: 5
     },
-    imagenPrincipal: {
+    mainImage: {
         type: String,
-        required: true,
-        trim: true
+        trim: true,
+        default: 'DEFAULT'
     },
-    imagenes: {
+    images: {
         type: [String],
         default: []
     },
     stock: {
         type: Number,
-        required: true,
-        default: 1000,
+        default: 0,
         min: 0
     }
 });
 
+productSchema.set('toJSON', {
+    versionKey: false,
+    transform: (_doc, ret) => {
+        delete ret._id;
+        return ret;
+    }
+});
+
 productSchema.index({
-    titulo: 'text',
-    descripcion: 'text'
+    title: 'text',
+    description: 'text'
 });
 
 productSchema.pre('save', async function (next) {
