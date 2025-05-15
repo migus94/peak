@@ -151,7 +151,6 @@ router.get('/:id', validateInt('id'), authenticate, async (req, res) => {
     }
 });
 
-
 /**
  * @swagger
  * /api/products:
@@ -315,7 +314,7 @@ router.put('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
             if (Array.isArray(currentValue) && Array.isArray(newValue)) {
                 const diferent =
                     newValue.length !== currentValue.length ||
-                    newValue.some((el, i) => el !== currentValue[i]);
+                    newValue.some((element, index) => element !== currentValue[index]);
                 if (diferent) {
                     updatedObject[key] = newValue;
                 }
@@ -363,8 +362,8 @@ router.put('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
  *         name: id
  *         required: true
  *         schema:
- *           type: string
- *         description: Id del producto a editar 
+ *           type: integer
+ *         description: Id publico del producto a editar 
  *     responses:
  *       "204":
  *         description: Producto eliminado
@@ -374,11 +373,24 @@ router.put('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
  *         description: No autorizado
  *       "404":
  *         description: Producto no encontrado
+ *       "500":
+ *         description: Error de servidor
  */
-router.delete('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
-    const { id } = req.params
-    // TODO implementar logica de edicion
-    res.status(204).end();
+router.delete('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async (req, res) => {
+    const publicId = req.params.id
+
+    try {
+        const deleted = await Product.findOneAndDelete({ publicId });
+
+        if (!deleted) {
+            return res.status(404).json({ message: 'Producto no encontrado' })
+        }
+        return res.status(204).json({ message: `Producto ${publicId} eliminado` });
+    } catch (error) {
+        console.error(`Error editando el producto ${publicId}`, e);
+        return res.status(500).json({ message: 'Error de servidor' });
+    }
+
 });
 
 /**
@@ -395,8 +407,8 @@ router.delete('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
  *         name: id
  *         required: true
  *         schema:
- *           type: string
- *         description: Id del producto a clonar
+ *           type: integer
+ *         description: Id publico del producto a clonar
  *     responses:
  *       "201":
  *         description: Producto clonado
@@ -410,11 +422,38 @@ router.delete('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
  *         description: No autorizado
  *       "404":
  *         description: Producto original no encontrado
+ *       "500":
+ *         description: Error de servidor
  */
 router.post('/:id/clone', authenticate, authorize('ADMIN'), async (req, res) => {
-    const { id } = req.params
+    const publicId = req.params.id
+    try {
+        const item = await Product.findOne({ publicId });
+        if (!item) {
+            return res.status(404).json({ message: `Producto ${publicId} no encontrado` })
+        }
 
-    res.status(201).json({});
+        const clonedItem = {
+            title: item.title,
+            description: item.description,
+            price: item.price,
+            rating: item.rating,
+            mainImage: item.mainImage,
+            images: item.images,
+            stock: item.stock
+        };
+
+        const newProduct = new Product(clonedItem);
+        await newProduct.save();
+        return res.status(201).json(newProduct);
+
+    } catch (error) {
+        console.error(`Error clonando el producto ${publicId}`, e);
+        if (e.name === 'ValidationError') {
+            return res.status(400).json({ message: 'Datos invalidos' });
+        }
+        return res.status(500).json({ message: 'Error de servidor' });
+    }
 });
 
 module.exports = router;

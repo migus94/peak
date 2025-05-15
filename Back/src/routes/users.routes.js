@@ -53,7 +53,7 @@ router.get('/', authenticate, authorize('ADMIN'), async (req, res) => {
             filter.name = { $regex: name, $options: 'i' };
         }
 
-        const users = await user.find(filter).select('-passwordHash');
+        const users = await User.find(filter).select('-passwordHash');
         return res.json(users)
 
     } catch (e) {
@@ -267,7 +267,7 @@ router.delete('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async
         if (!userDeleted) {
             return res.status(404).json({ message: `Usuario ${publicId} no encontrado` });
         }
-        return res.status(204).end();
+        return res.status(204).json({ message: `Usuario ${publicId} eliminado` });
     } catch (e) {
         console.error(`Error al eliminar usuario ${publicId}`, e);
         return res.status(500).json({ message: 'Error de servidor' });
