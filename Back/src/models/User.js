@@ -19,12 +19,6 @@
  *         password:
  *           type: string
  *           descripcion: Contraseña en texto (Se obtiene el Hash postetiormente)
- */
-
-/**
- * @swagger
- * components:
- *   schemas:
  *     User:
  *       type: object
  *       required:
@@ -33,9 +27,9 @@
  *         - email
  *         - passwordHash
  *       properties:
- *         publocId:
+ *         publicId:
  *           type: number
- *           description: Id publico incremental de usuario
+ *           description: Id publico del usuario
  *         name: 
  *           type: string
  *           description: Nombre de usuario
@@ -85,6 +79,14 @@ const userSchema = new Schema({
         type: String,
         enum: ['USER', 'ADMIN'],
         default: 'USER'
+    }
+});
+
+userSchema.set('toJSON', {
+    versionKey: false,
+    transform: (_doc, ret) => {
+        delete ret._id;
+        return ret;
     }
 });
 

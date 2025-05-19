@@ -53,11 +53,11 @@ router.get('/', authenticate, authorize('ADMIN'), async (req, res) => {
             filter.name = { $regex: name, $options: 'i' };
         }
 
-        const users = await user.find(filter).select('-passwordHash');
+        const users = await User.find(filter).select('-passwordHash');
         return res.json(users)
 
     } catch (e) {
-        console.log("Error al listar usuarios ", e);
+        console.error("Error al listar usuarios ", e);
         return res.status(500).json({ message: "Error de servidor" });
     }
 });
@@ -205,11 +205,11 @@ router.put('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async (r
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        const updatable = ['name', 'email', 'rol'];
-        const updates = updatable.reduce((updatedObject, key) => {
+        const fields = ['name', 'email', 'rol'];
+        const updates = fields.reduce((updatedObject, key) => {
             const value = req.body[key]
             if (value) { // != null
-                const parsedValue = key === 'email'
+                const parsedValue = (key === 'email')
                     ? String(value).toLowerCase().trim()
                     : String(value).trim();
                 if (parsedValue !== foundUser[key]) {
@@ -259,7 +259,6 @@ router.put('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async (r
  *       "500":
  *         description: Error de servidor
  */
-// valorar si para otros usuarios
 router.delete('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async (req, res) => {
     const publicId = req.params.id;
     try {
@@ -267,7 +266,7 @@ router.delete('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async
         if (!userDeleted) {
             return res.status(404).json({ message: `Usuario ${publicId} no encontrado` });
         }
-        return res.status(204).end();
+        return res.status(204).json({ message: `Usuario ${publicId} eliminado` });
     } catch (e) {
         console.error(`Error al eliminar usuario ${publicId}`, e);
         return res.status(500).json({ message: 'Error de servidor' });
