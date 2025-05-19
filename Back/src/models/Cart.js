@@ -22,16 +22,16 @@
  *         - items
  *       properties:
  *         userId:
- *           type: integer
- *           description: Id publico del usuario dueño del carrito
+ *           type: string
+ *           description: _Id del usuario dueño del carrito
  *         items: 
  *           type: array
  *           description: Lista de id de productos y cantidades
  *           items: 
  *             $ref: '#/components/schemas/CartItem'
  */
-
-const Schema = require('mongoose').Schema;
+const { Schema, model } = require('mongoose');
+const ObjectId = Schema.Types.ObjectId;
 
 const cartItemSchema = new Schema({
     productId: { type: Number, required: true },
@@ -39,15 +39,18 @@ const cartItemSchema = new Schema({
 }, { _id: false });
 
 const cartSchema = new Schema({
-    userId: { type: Number, required: true },
+    userId: { type: ObjectId, ref: 'User', required: true },
     items: { type: [cartItemSchema], required: true }
-}, { timestamps: true });
-
-cartSchema.set('toJSON', {
+}, {
+    timestamps: true,
     versionKey: false,
-    transform: (_doc, ret) => {
-        delete ret._id;
-        return ret;
+    toJSON: {
+        virtuals: false,
+        transform: (_doc, ret) => {
+            delete ret._id;
+            delete ret.userId;
+            return ret;
+        }
     }
 });
 

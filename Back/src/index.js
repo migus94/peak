@@ -15,10 +15,12 @@ connectDB();
 const authRoutes = require('./routes/auth.routes');
 const productsRoutes = require('./routes/products.routes');
 const usersRoutes = require('./routes/users.routes');
+const cartRoutes = require('./routes/Cart.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/users', usersRoutes);
+app.use('/api/cart', cartRoutes);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

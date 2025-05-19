@@ -57,7 +57,7 @@ router.get('/', authenticate, authorize('ADMIN'), async (req, res) => {
         return res.json(users)
 
     } catch (e) {
-        console.log("Error al listar usuarios ", e);
+        console.error("Error al listar usuarios ", e);
         return res.status(500).json({ message: "Error de servidor" });
     }
 });
@@ -259,7 +259,6 @@ router.put('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async (r
  *       "500":
  *         description: Error de servidor
  */
-// valorar si para otros usuarios
 router.delete('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async (req, res) => {
     const publicId = req.params.id;
     try {

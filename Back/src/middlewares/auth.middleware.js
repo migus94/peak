@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 
 function authenticate(req, res, next) {
-    console.log('Autenticando...', req.headers);
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
         return res.status(401).json({ error: 'Token faltante' });

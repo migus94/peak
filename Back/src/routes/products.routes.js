@@ -230,7 +230,8 @@ router.post(
             }
             return res.status(500).json({ message: 'Error de servidor' });
         }
-    });
+    }
+);
 
 
 /**
@@ -378,7 +379,6 @@ router.put('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
  */
 router.delete('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async (req, res) => {
     const publicId = req.params.id
-
     try {
         const deleted = await Product.findOneAndDelete({ publicId });
 
@@ -390,7 +390,6 @@ router.delete('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async
         console.error(`Error editando el producto ${publicId}`, e);
         return res.status(500).json({ message: 'Error de servidor' });
     }
-
 });
 
 /**
