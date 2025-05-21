@@ -11,6 +11,7 @@ const { authenticate, authorize } = require('../middlewares/auth.middleware');
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Products');
+const Cart = require('../models/Cart');
 
 /**
  * @swagger
@@ -364,7 +365,7 @@ router.put('/:id', authenticate, authorize('ADMIN'), async (req, res) => {
  *         required: true
  *         schema:
  *           type: integer
- *         description: Id publico del producto a editar 
+ *         description: Id publico del producto a eliminar 
  *     responses:
  *       "204":
  *         description: Producto eliminado
@@ -385,9 +386,14 @@ router.delete('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async
         if (!deleted) {
             return res.status(404).json({ message: 'Producto no encontrado' })
         }
-        return res.status(204).json({ message: `Producto ${publicId} eliminado` });
-    } catch (error) {
-        console.error(`Error editando el producto ${publicId}`, e);
+
+        await Cart.updateMany(
+            { 'items.productId': publicId },
+            { $pull: { items: { productId: publicId } } }
+        )
+        return res.status(204)
+    } catch (e) {
+        console.error(`Error eliminando el producto ${publicId}`, e);
         return res.status(500).json({ message: 'Error de servidor' });
     }
 });

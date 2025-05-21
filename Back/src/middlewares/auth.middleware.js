@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 
+// TODO generar control de usuario proprietario
+
 function authenticate(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
