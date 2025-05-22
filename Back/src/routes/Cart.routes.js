@@ -142,12 +142,25 @@ router.post('/', authenticate, async (req, res) => {
     if (!Number.isInteger(productId) || !Number.isInteger(quantity) || quantity < 1) {
         return res.status(400).json({ message: 'Id y cantidad deben ser enteros y validos' })
     }
-    try {
-        const productExists = await Products.exists({ publicId: productId });
-        if (!productExists) {
-            return res.status(400).json({ message: `El producto ${productId} no se encuentra disponible` })
-        }
+    const product = await Products.findOne({ publicId: productId });
+    if (!product) {
+        return res.status(400).json({ message: `El producto ${productId} no se encuentra disponible` })
+    }
 
+    const cart = await Cart.findOne({ userId: req.userId });
+    let inCartQuantity = 0;
+    if (cart) {
+        const preselected = cart.items.find(item => item.productId === productId);
+        inCartQuantity = preselected ? preselected.quantity : 0;
+    }
+    if (inCartQuantity + quantity > product.stock) {
+        return res.status(400).json({ message: `${quantity} ${product.title} no se encuentra disponibles` })
+    }
+    if (!product) {
+        return res.status(400).json({ message: `El producto ${productId} no se encuentra disponible` })
+    }
+
+    try {
         let cart = await Cart.findOneAndUpdate(
             { userId: req.userId, 'items.productId': productId },
             { $inc: { 'items.$.quantity': quantity } },
@@ -275,25 +288,41 @@ router.put('/:id', validateInt('id'), authenticate, async (req, res) => {
     const delta = isIncrease ? 1 : -1;
 
     try {
+
+        const cart = await Cart.findOne({ userId: req.userId });
+        const cartItem = cart.items.find(item => item.productId === productId)
+        if (!cart || !cartItem) {
+            return res.status(404).json({
+                message: `Producto ${productId} o carrito no encontrado`
+            });
+        }
+
+        if (isIncrease) {
+            const product = await Products.findOne({ publicId: productId });
+            if (!product) {
+                return res.status(404).json({ message: `Producto ${productId} no encontrado` });
+            }
+            if (cartItem.quantity + 1 > product.stock) {
+                return res.status(404).json({
+                    message: `Stock insuficiente del producto ${productId}`
+                });
+            }
+        }
+
         const updatedCart = await Cart.findOneAndUpdate(
             { userId: req.userId, 'items.productId': productId },
             { $inc: { 'items.$.quantity': delta } },
             { new: true }
         );
 
-        if (!updatedCart) {
-            return res.status(404).json({
-                message: `Producto ${productId} no encontrado en el carrito`
-            });
-        }
-
         const updatedItem = updatedCart.items.find(item => item.productId === productId);
         if (updatedItem.quantity <= 0) {
-            await Cart.findOneAndUpdate(
+            const cartDeleted = await Cart.findOneAndUpdate(
                 { userId: req.userId },
-                { $pull: { items: { productId } } }
+                { $pull: { items: { productId } } },
+                { new: true }
             );
-            return res.status(204).end();
+            return res.json(cartDeleted);
         }
 
         return res.json(updatedCart);
