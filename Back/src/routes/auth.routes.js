@@ -212,4 +212,5 @@ router.post('/refresh', requiredFields(['refreshToken']), async (req, res) => {
     }
 });
 
+// TODO controles de parametros como email o password
 module.exports = router;

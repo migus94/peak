@@ -142,12 +142,25 @@ router.post('/', authenticate, async (req, res) => {
     if (!Number.isInteger(productId) || !Number.isInteger(quantity) || quantity < 1) {
         return res.status(400).json({ message: 'Id y cantidad deben ser enteros y validos' })
     }
-    try {
-        const productExists = await Products.exists({ publicId: productId });
-        if (!productExists) {
-            return res.status(400).json({ message: `El producto ${productId} no se encuentra disponible` })
-        }
+    const product = await Products.findOne({ publicId: productId });
+    if (!product) {
+        return res.status(400).json({ message: `El producto ${productId} no se encuentra disponible` })
+    }
 
+    const cart = await Cart.findOne({ userId: req.userId });
+    let inCartQuantity = 0;
+    if (cart) {
+        const preselected = cart.items.find(item => item.productId === productId);
+        inCartQuantity = preselected ? preselected.quantity : 0;
+    }
+    if (inCartQuantity + quantity > product.stock) {
+        return res.status(400).json({ message: `${quantity} ${product.title} no se encuentra disponibles` })
+    }
+    if (!product) {
+        return res.status(400).json({ message: `El producto ${productId} no se encuentra disponible` })
+    }
+
+    try {
         let cart = await Cart.findOneAndUpdate(
             { userId: req.userId, 'items.productId': productId },
             { $inc: { 'items.$.quantity': quantity } },
@@ -167,6 +180,181 @@ router.post('/', authenticate, async (req, res) => {
         if (e.name === 'ValidationError') {
             return res.status(400).json({ message: 'Datos invalidos' });
         }
+        return res.status(500).json({ message: 'Error de servidor' });
+    }
+});
+
+/**
+ * @swagger
+ * /api/cart/{id}:
+ *   delete:
+ *     summary: Eliminar un producto del carrito
+ *     tags: 
+ *       - Cart
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Id publico del producto a eliminar 
+ *     responses:
+ *       "204":
+ *         description: Producto eliminado del carrito
+ *       "401":
+ *         description: Token faltante
+ *       "404":
+ *         description: Producto no encontrado en el carrito
+ *       "500":
+ *         description: Error de servidor
+ */
+router.delete('/:id', validateInt('id'), authenticate, async (req, res) => {
+    const productId = req.params.id
+    try {
+        const deletedItem = await Cart.findOneAndUpdate(
+            { userId: req.userId, 'items.productId': productId },
+            { $pull: { items: { productId } } },
+            { new: true }
+        );
+
+        if (!deletedItem) {
+            return res.status(404).json({
+                message: `Producto ${productId} no encontrado en el carrito`
+            });
+        }
+
+        return res.status(204).end();
+    } catch (e) {
+        console.error(`Error eliminando el producto ${productId} del carrito`, e);
+        return res.status(500).json({ message: 'Error de servidor' });
+    }
+});
+
+/**
+ * @swagger
+ * /api/cart/{id}:
+ *   put:
+ *     summary: actualizar la cantidad de productos de un carrito de uno en uno 
+ *     tags: 
+ *       - Cart
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Id publico del del producto al que actualizar la cantidad
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - isIncrease
+ *             properties:
+ *               isIncrease:
+ *                 type: boolean
+ *                 description: true = +1, false = -1
+ *     responses:
+ *       "200":
+ *         description: Carrito actualizado
+ *         content: 
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Cart'
+ *       "400":
+ *         description: Datos invalidos
+ *       "401":
+ *         description: Token faltante
+ *       "404": 
+ *         description: Producto no encontrado
+ *       "500":
+ *         description: Error de servidor
+ */
+router.put('/:id', validateInt('id'), authenticate, async (req, res) => {
+    const productId = req.params.id;
+    const { isIncrease } = req.body;
+
+    if (typeof isIncrease !== 'boolean') {
+        return res.status(400).json({
+            message: `isIncrease debe ser booleano`
+        })
+    };
+    const delta = isIncrease ? 1 : -1;
+
+    try {
+
+        const cart = await Cart.findOne({ userId: req.userId });
+        const cartItem = cart.items.find(item => item.productId === productId)
+        if (!cart || !cartItem) {
+            return res.status(404).json({
+                message: `Producto ${productId} o carrito no encontrado`
+            });
+        }
+
+        if (isIncrease) {
+            const product = await Products.findOne({ publicId: productId });
+            if (!product) {
+                return res.status(404).json({ message: `Producto ${productId} no encontrado` });
+            }
+            if (cartItem.quantity + 1 > product.stock) {
+                return res.status(404).json({
+                    message: `Stock insuficiente del producto ${productId}`
+                });
+            }
+        }
+
+        const updatedCart = await Cart.findOneAndUpdate(
+            { userId: req.userId, 'items.productId': productId },
+            { $inc: { 'items.$.quantity': delta } },
+            { new: true }
+        );
+
+        const updatedItem = updatedCart.items.find(item => item.productId === productId);
+        if (updatedItem.quantity <= 0) {
+            const cartDeleted = await Cart.findOneAndUpdate(
+                { userId: req.userId },
+                { $pull: { items: { productId } } },
+                { new: true }
+            );
+            return res.json(cartDeleted);
+        }
+
+        return res.json(updatedCart);
+    } catch (e) {
+        console.error(`Error al actualizar producto ${productId}`, e);
+        return res.status(500).json({ message: 'Error de servidor' });
+    };
+});
+
+/**
+ * @swagger
+ * /api/cart:
+ *   delete:
+ *     summary: vaciar el carrito
+ *     tags: 
+ *       - Cart
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       "204":
+ *         description: Producto eliminado del carrito
+ *       "401":
+ *         description: Token faltante
+ *       "500":
+ *         description: Error de servidor
+ */
+router.delete('/', authenticate, async (req, res) => {
+    try {
+        await Cart.findOneAndDelete({ userId: req.userId });
+        return res.status(204).end();
+    } catch (e) {
+        console.error(`Error vaciando el carrito del usuario`, e);
         return res.status(500).json({ message: 'Error de servidor' });
     }
 });

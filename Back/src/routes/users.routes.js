@@ -208,7 +208,7 @@ router.put('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async (r
         const fields = ['name', 'email', 'rol'];
         const updates = fields.reduce((updatedObject, key) => {
             const value = req.body[key]
-            if (value) { // != null
+            if (value) {
                 const parsedValue = (key === 'email')
                     ? String(value).toLowerCase().trim()
                     : String(value).trim();
