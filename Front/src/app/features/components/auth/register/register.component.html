@@ -1,18 +1,34 @@
-<div class="login">
-    <h1 class="login--title">Inicio de sesión</h1>
+<div class="register">
+    <h1 class="register--title">Unete!</h1>
     <form 
         [formGroup]="form"
-        (ngSubmit)="login()"
-        class="login--form"
+        (ngSubmit)="register()"
+        class="register--form"
         novalidate
     >
+        <div class="form-group">
+            <label for="name">Nombre</label>
+            <input 
+                id="name"
+                type="text"
+                formControlName="name"
+                class="input"
+                [class.invalid]="form.controls.name.invalid && form.controls.name.touched"
+                placeholder="Nombre completo..."
+            />
+            @if (form.controls.name.touched && form.controls.name.hasError('required'))
+            <div class="error">El nombre es necesario</div>
+            @endif
+            @if (form.controls.name.touched && form.controls.name.hasError('minLength'))
+                <div class="error">Nombre demasiado corto</div>
+            @endif
+        </div>
         <div class="form-group">
             <label for="email">Correo electrónico</label>
             <input 
                 id="email"
                 type="email"
                 formControlName="email"
-                class="input"
                 [class.invalid]="form.controls.email.invalid && form.controls.email.touched"
                 placeholder="example@..."
             />
@@ -20,11 +36,11 @@
             <div class="error">Correo obligatorio</div>
             @endif
             @if (form.controls.email.touched && form.controls.email.hasError('email'))
-                <div class="error">Correo invalido</div>
+                <div class="error">Correo inválido</div>
             @endif
         </div>
 
-        <div class="form-group">
+         <div class="form-group">
             <label for="password">Contraseña</label>
             <input 
                 id="password"
@@ -47,9 +63,9 @@
             class="btn btn-primary"
         >
             @if (isLoading())
-                cargando...
+                Registrando...
             @else 
-                Enviar
+                Registrar
             @endif
         </button>
 

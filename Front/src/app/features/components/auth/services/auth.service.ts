@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
-import { LoginRequest, LoginResponse, RefreshRequest, RegisterRequest } from '../../core/interfaces/auth.interface';
-import { enviroment } from '../../../enviroment/enviroment';
+import { LoginRequest, LoginResponse, RefreshRequest, RegisterRequest } from '../../../../core/interfaces/auth.interface';
+import { enviroment } from '../../../../../enviroment/enviroment';
 
 @Injectable({
   providedIn: 'root'
