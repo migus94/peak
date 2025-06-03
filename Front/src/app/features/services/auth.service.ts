@@ -23,7 +23,7 @@ export class AuthService {
     private router: Router
   ) {}
 
-  login(payload: LoginRequest) {
+  login(payload: LoginRequest, password: any) {
     return this.http
       .post<LoginResponse>(`${this.API_BASE}${this.authRoutue}${this.loginRoutue}`, payload)
       .pipe(
