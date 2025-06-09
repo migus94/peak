@@ -2,8 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
-import { LoginRequest, LoginResponse, RefreshRequest, RegisterRequest } from '../../../../core/interfaces/auth.interface';
-import { enviroment } from '../../../../../enviroment/enviroment';
+
+import { enviroment } from '../../../../enviroment/enviroment';
+import { LoginRequest, LoginResponse, RefreshRequest, RegisterRequest } from '../../../core/interfaces/auth.interface';
+
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +25,9 @@ export class AuthService {
     private router: Router
   ) {}
 
-  login(payload: LoginRequest, password: any) {
+  login(payload: LoginRequest, password: string) {
+    console.log(payload)
+    console.log(password)
     return this.http
       .post<LoginResponse>(`${this.API_BASE}${this.authRoutue}${this.loginRoutue}`, payload)
       .pipe(

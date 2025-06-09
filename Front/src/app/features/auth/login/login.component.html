@@ -13,15 +13,15 @@
                 type="email"
                 formControlName="email"
                 class="input"
-                [class.invalid]="form.controls.email.invalid && form.controls.email.touched"
+                [class.invalid]="form.controls['email'].invalid && form.controls['email'].touched"
                 placeholder="example@..."
             />
-            @if (form.controls.email.touched && form.controls.email.hasError('required'))
-            <div class="error">Correo obligatorio</div>
-            @endif
-            @if (form.controls.email.touched && form.controls.email.hasError('email'))
+            @if (form.controls['email'].touched && form.controls['email'].hasError('required')) {
+                <div class="error">Correo obligatorio</div>
+            } 
+            @if (form.controls['email'].touched && form.controls['email'].hasError('email')) {
                 <div class="error">Correo invalido</div>
-            @endif
+            }
         </div>
 
         <div class="form-group">
@@ -30,15 +30,15 @@
                 id="password"
                 type="password"
                 formControlName="password"
-                [class.invalid]="form.controls.password.invalid && form.controls.password.touched"
+                [class.invalid]="form.controls['password'].invalid && form.controls['password'].touched"
                 placeholder="******"
             />
-            @if (form.controls.password.touched && form.controls.password.hasError('required'))
+            @if (form.controls['password'].touched && form.controls['password'].hasError('required')) {
             <div class="error">Contraseña obligatoria</div>
-            @endif
-            @if (form.controls.password.touched && form.controls.password.hasError('minLength'))
+            }
+            @if (form.controls['password'].touched && form.controls['password'].hasError('minlength')) {
                 <div class="error">La contraseña debe tener más de 5 caracteres</div>
-            @endif
+            }
         </div>
 
         <button 
@@ -46,15 +46,17 @@
             [disabled]="!canSubmit() || isLoading()"
             class="btn btn-primary"
         >
-            @if (isLoading())
+            @if (isLoading()) {
                 cargando...
-            @else 
+            } @else { 
                 Enviar
-            @endif
+            }
         </button>
+        {{!canSubmit()}}
+        {{isLoading()}}
 
-        @if (errorMsg)
+        @if (errorMsg()) {
             <div class="error">{{ errorMsg() }}</div>
-        @endif
+        }
     </form>
 </div>

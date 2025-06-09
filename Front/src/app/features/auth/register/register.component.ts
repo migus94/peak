@@ -1,45 +1,48 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { RegisterFormService } from '../services/register-form.service';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { LoginFormService } from '../services/login-form.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-register',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  templateUrl: './register.component.html',
+  styleUrl: './register.component.scss'
 })
-export class LoginComponent {
+export class RegisterComponent {
 
   private authService = inject(AuthService);
   private router = inject(Router);
-  private formService = inject(LoginFormService);
+  private formService = inject(RegisterFormService);
 
   readonly form = this.formService.getForm();
   readonly isLoading = signal(false);
   readonly errorMsg = signal<string | null>(null);
-  readonly canSubmit = computed(()=> this.form.valid && this.form.dirty);
 
-  login() {
+  readonly canSubmit = computed(()=> 
+    this.form.valid && this.form.dirty && !this.isLoading()
+  );
+
+  register(): void {
     if (!this.canSubmit()) {return};
     this.errorMsg.set(null);
     this.isLoading.set(true);
-    const {email, password} = this.form.getRawValue();
+    
+    const { name, email, password } = this.form.getRawValue();
 
-    this.authService.login(email, password). subscribe({
+    this.authService.register({name, email, password}).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.formService.resetForm();
-        this.router.navigate(['/']);
+        this.router.navigate(['/login']);
       },
       error: (e) => {
         this.isLoading.set(false);
-        e.status === 401 ? this.errorMsg.set('Credenciales invalidas')
-          : this.errorMsg.set('Errro de servidor');
+        this.errorMsg.set(e.error?.message || 'Error en el registro');
       }
     });
-  };
+  }
 }

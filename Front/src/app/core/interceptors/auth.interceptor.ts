@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, Observable, switchMap, throwError } from 'rxjs';
-import { AuthService } from '../../features/components/auth/services/auth.service';
+import { AuthService } from '../../features/auth/services/auth.service';
 import { LoginRequest, LoginResponse, RefreshRequest } from '../interfaces/auth.interface';
 import { enviroment } from '../../../enviroment/enviroment';
 
