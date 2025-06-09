@@ -1,0 +1,15 @@
+:host {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-pimenubar {
+    background: linear-gradient(to right, #0d47a1, #1976d2);
+    border: none;
+}
+
+.navbar-pimenubar .navbar-menuitem-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
