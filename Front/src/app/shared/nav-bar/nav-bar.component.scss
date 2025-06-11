@@ -1,15 +1,95 @@
 :host {
-    display: block;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+  display: block;
+  width: 100%;
 }
 
-.navbar-pimenubar {
-    background: linear-gradient(to right, #0d47a1, #1976d2);
-    border: none;
+:host ::ng-deep .p-toolbar {
+  width: 100%;
+  height: 60px;
+  background-color: var(--color-primary, #0288d1);
+  color: white;
+  font-family: var(--font-family-main, 'Iceberg', sans-serif);
+  border-bottom: 4px solid var(--color-accent, #01579b);
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
 }
 
-.navbar-pimenubar .navbar-menuitem-link:hover {
+:host ::ng-deep .p-toolbar .left,
+:host ::ng-deep .p-toolbar .right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  height: 100%;
+}
+
+:host ::ng-deep .p-toolbar .right {
+  margin-left: auto;
+}
+
+:host ::ng-deep .toolbar-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 100%;
+  line-height: 60px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--color-accent, #01579b);
+  }
+}
+
+:host ::ng-deep .toolbar-button.p-button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  height: 100%;
+
+  &:hover {
     background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-accent, #01579b);
+  }
+
+  .p-button-icon {
+    margin-right: 0.5rem;
+  }
+}
+
+.custom-dropdown {
+  position: absolute;
+  top: 60px;
+  right: 1rem;
+  background-color: #b3e5fc;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0;
+
+  a {
+    color: #01579b;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #81d4fa;
+      color: #004c8c;
+    }
+  }
 }

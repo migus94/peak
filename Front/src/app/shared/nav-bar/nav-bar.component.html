@@ -1,4 +1,33 @@
-<p-menubar
-    [model]="items"
-    styleClass="navbar-pimenubar"
-/>
+<p-toolbar class="navbar-toolbar">
+  <div class="left">
+    <a routerLink="/" class="toolbar-link">
+      <i class="pi pi-home"></i> Inicio
+    </a>
+    <a routerLink="/products" class="toolbar-link">
+      <i class="pi pi-tags"></i> Productos
+    </a>
+  </div>
+  <div class="right">
+    <a *ngIf="isLogged" routerLink="/cart" class="toolbar-link">
+      <i class="pi pi-shopping-cart"></i>
+    </a>
+
+    <button
+      pButton
+      type="button"
+      icon="pi pi-user"
+      label="Perfil"
+      class="toolbar-button"
+      (click)="toggleMenu()"
+    ></button>
+
+    <div
+      *ngIf="showMenu"
+      class="custom-dropdown"
+      (click)="$event.stopPropagation()"
+    >
+      <a routerLink="/profile"><i class="pi pi-cog"></i> Mi cuenta</a>
+      <a (click)="logout()"><i class="pi pi-sign-out"></i> Cerrar sesión</a>
+    </div>
+  </div>
+</p-toolbar>

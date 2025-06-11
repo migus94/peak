@@ -3,8 +3,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
 
-import { enviroment } from '../../../../enviroment/enviroment';
-import { LoginRequest, LoginResponse, RefreshRequest, RegisterRequest } from '../../../core/interfaces/auth.interface';
+import { LoginRequest, LoginResponse, RefreshRequest, RegisterRequest, RegisterResponse } from '../../../core/interfaces/auth.interface';
 
 
 @Injectable({
@@ -14,10 +13,10 @@ export class AuthService {
   private readonly TOKEN_KEY = 'accesToken';
   private readonly REFRESH_KEY = 'refreshToken';
   
-  private readonly API_BASE = `${enviroment.apiUrl}`;
+  private readonly apiBase = '/api';
   private authRoutue = '/auth';
   private loginRoutue = '/login';
-  private singUpRoutue = '/singUp';
+  private singUpRoutue = '/signup';
   private refreshRoutue = '/refresh';
 
   constructor(
@@ -25,11 +24,10 @@ export class AuthService {
     private router: Router
   ) {}
 
-  login(payload: LoginRequest, password: string) {
-    console.log(payload)
+  login(email: string, password: string) {
     console.log(password)
     return this.http
-      .post<LoginResponse>(`${this.API_BASE}${this.authRoutue}${this.loginRoutue}`, payload)
+      .post<LoginResponse>(`${this.apiBase}${this.authRoutue}${this.loginRoutue}`, {email, password})
       .pipe(
         tap(({ accesToken, refreshToken }) => {
           localStorage.setItem('accesToken', accesToken),
@@ -39,12 +37,12 @@ export class AuthService {
   }
 
   register(payload: RegisterRequest) {
-    return this.http.post<RegisterRequest>(`${this.API_BASE}${this.authRoutue}${this.singUpRoutue}`, payload);
+    return this.http.post<RegisterResponse>(`${this.apiBase}${this.authRoutue}${this.singUpRoutue}`, payload);
   }
 
   refreshToken(body: RefreshRequest) {
     return this.http
-      .post<LoginResponse>(`${this.API_BASE}${this.authRoutue}${this.refreshRoutue}`, body)
+      .post<LoginResponse>(`${this.apiBase}${this.authRoutue}${this.refreshRoutue}`, body)
       .pipe(
         tap(({ accesToken, refreshToken }) => {
           localStorage.setItem('accesToken', accesToken),

@@ -1,7 +1,19 @@
 @use "sass:color";
 
+@import url('https://fonts.googleapis.com/css2?family=Iceberg&display=swap');
+
+:root {
+  --color-background: #e0f7fa;
+  --color-primary: #0288d1;
+  --color-primary-dark: #0277bd;
+  --color-accent: #81d4fa;
+  --color-text-dark: #01579b;
+  --font-family-main: 'Iceberg', 'Helvetica Neue', Arial, sans-serif;
+}
+
 body {
     margin: 0;
-    font-family: Roboto, sans-serif;
-    background: #f5f5f5;
+    padding: 0;
+    font-family: var(--font-family-main);
+    background-color: var(--color-background);
 }

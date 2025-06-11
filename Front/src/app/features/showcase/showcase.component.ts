@@ -1,9 +1,15 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { RouterModule, RouterOutlet } from '@angular/router';
+import { MenubarModule } from 'primeng/menubar';
+import { AuthService } from '../auth/services/auth.service';
+import { NavBarComponent } from '../../shared/nav-bar/nav-bar.component';
+import { SideNavComponent } from '../../shared/side-nav/side-nav.component';
 
 @Component({
   selector: 'app-showcase',
   standalone: true,
-  imports: [],
+  imports: [[CommonModule, RouterOutlet, NavBarComponent, SideNavComponent]],
   templateUrl: './showcase.component.html',
   styleUrl: './showcase.component.scss'
 })

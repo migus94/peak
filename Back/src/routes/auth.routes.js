@@ -147,7 +147,7 @@ router.post('/signup', requiredFields(['name', 'email', 'password']), async (req
 router.post('/login', requiredFields(['email', 'password']), async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email: email ? email.toLowerCase() : email });
+        const user = await User.findOne({ email: email?.toLowerCase() });
         if (!user) return res.status(401).json({ error: 'Datos no validos' });
 
         const match = await bcrypt.compare(password, user.passwordHash);

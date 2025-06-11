@@ -1,9 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { RegisterFormService } from '../services/register-form.service';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map, startWith } from 'rxjs';
+import { RegisterRequest } from '../../../core/interfaces/auth.interface';
 
 @Component({
   selector: 'app-register',
@@ -22,8 +25,25 @@ export class RegisterComponent {
   readonly isLoading = signal(false);
   readonly errorMsg = signal<string | null>(null);
 
+
+  readonly isValid = toSignal(
+    this.form.statusChanges.pipe(
+      startWith(this.form.status),
+      map(status => status === 'VALID')
+    ),
+    {initialValue: this.form.status === 'VALID'}
+  );
+
+  readonly isDirty = toSignal(
+    this.form.statusChanges.pipe(
+      startWith(this.form.status),
+      map(() => this.form.dirty)
+    ),
+    {initialValue: this.form.dirty}
+  );
+
   readonly canSubmit = computed(()=> 
-    this.form.valid && this.form.dirty && !this.isLoading()
+    this.isDirty() && this.isValid()
   );
 
   register(): void {
@@ -31,7 +51,7 @@ export class RegisterComponent {
     this.errorMsg.set(null);
     this.isLoading.set(true);
     
-    const { name, email, password } = this.form.getRawValue();
+    const { name, email, password } = this.form.getRawValue() as RegisterRequest;
 
     this.authService.register({name, email, password}).subscribe({
       next: () => {
