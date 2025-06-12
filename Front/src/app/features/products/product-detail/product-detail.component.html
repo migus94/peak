@@ -1,0 +1,30 @@
+<div class="product-detail">
+    @if (product() !== null) {
+        <div class="product-card">
+            <div class="image-section">
+                <img [src]="product()!.mainImage"/>
+            </div>
+    
+            <div class="product-info">
+                <div class="title-rating">
+                    <h2> {{ product()!.title }}</h2>
+                    <p-rating [readonly]="true" [ngModel]="product()!.rating"></p-rating>
+                </div>
+                <p class="description">{{ product()!.description}}</p>
+                <p class="price">{{ product()!.price | currency: 'EUR' }}</p>
+                <p class="stock" [class.out-of-stock]="product()!.stock === 0">
+                    {{ product()!.stock > 0 ? 'En stock: ' + product()!.stock : 'Agotado'}}
+                </p>
+                <button
+                    pButton
+                    type="button"
+                    icon="pi pi-shopping-cart"
+                    label=" + Añadir al carrito"
+                    [disabled]="product()!.stock === 0"
+                    class="add-to-cart-btn"
+                ></button>
+            </div>
+        </div>
+        <app-product-comments [canComment]="isLogged"></app-product-comments>
+    }
+</div>

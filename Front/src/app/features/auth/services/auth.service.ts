@@ -25,7 +25,6 @@ export class AuthService {
   ) {}
 
   login(email: string, password: string) {
-    console.log(password)
     return this.http
       .post<LoginResponse>(`${this.apiBase}${this.authRoutue}${this.loginRoutue}`, {email, password})
       .pipe(

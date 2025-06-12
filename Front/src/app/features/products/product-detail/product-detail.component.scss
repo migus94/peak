@@ -1,0 +1,121 @@
+.product-detail {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding: 1rem;
+  background-color: var(--color-background);
+
+  .product-card {
+    display: flex;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .image-section {
+    flex: 1;
+    background: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .image-section img {
+    max-width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+  }
+
+  .product-info {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-family: var(--font-family-main);
+  }
+
+  .product-info h2 {
+    font-size: 2.8rem;
+    font-weight: bold;
+    color: #212121;
+    margin-bottom: 0.5rem;
+  }
+
+  .description {
+    font-size: 1.1rem;
+    color: #424242;
+    margin-bottom: 1rem;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .price {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #0288d1;
+    margin: 0;
+  }
+
+  .stock {
+    font-size: 1rem;
+    color: #2e7d32;
+    margin: 0;
+  }
+
+  .stock.out-of-stock {
+    color: #d32f2f;
+  }
+
+  .add-to-cart-btn {
+    background-color: #8bc34a;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+    min-width: 130px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .add-to-cart-btn:hover {
+    background-color: #689f38;
+  }
+
+  .add-to-cart-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+}
+
+.title-rating-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #212121;
+    margin: 0;
+  }
+
+  p-rating {
+    font-size: 1.2rem;
+
+    .p-icon {
+      color: #ffa000;
+    }
+  }
+}

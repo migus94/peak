@@ -69,6 +69,11 @@
             }
         </button>
 
+        <div class="login-link">
+            ¿Ya tienes cuenta?
+            <a routerLink="/login">Ingresa aqui</a>
+        </div>
+
         @if (errorMsg()) {
             <div class="error">{{ errorMsg() }}</div>
         }

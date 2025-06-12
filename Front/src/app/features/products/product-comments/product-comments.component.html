@@ -1,0 +1,21 @@
+<div class="comments-section">
+  @if (canComment) {  
+    <div class="comment-form">
+        <h3>Escribe tu opinión</h3>
+        <textarea [(ngModel)]="newComment" placeholder="¿Qué te ha parecido?"></textarea>
+        <button pButton type="button" (click)="submitComment()" label="Enviar opinión"></button>
+    </div>
+  }
+
+  <h3>Opiniones de clientes</h3>
+
+  <div class="comment" *ngFor="let comment of comments">
+    <div class="comment-header">
+      <strong>{{ comment.name }}</strong>
+      <span class="stars">
+        <i class="pi pi-star" *ngFor="let s of [1,2,3,4,5]" [ngClass]="{ 'filled': s <= comment.rating }"></i>
+      </span>
+    </div>
+    <p class="comment-text">{{ comment.text }}</p>
+  </div>
+</div>

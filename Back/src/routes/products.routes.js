@@ -128,14 +128,12 @@ router.get('/', async (req, res) => {
  *               $ref: '#/components/schemas/Products'
  *       "400":
  *         description: Formato de id no valido
- *       "401":
- *         description: Token faltante
  *       "404":
  *         description: Producto no encontrado
  *       "500":
  *         description: Error de servidor
  */
-router.get('/:id', validateInt('id'), authenticate, async (req, res) => {
+router.get('/:id', validateInt('id'), async (req, res) => {
     const publicId = req.params.id;
 
     try {
