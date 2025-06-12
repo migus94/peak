@@ -3,7 +3,6 @@ export interface LoginRequest {
     password: string
 }
 
-//tambien para la respuesta de refresh
 export interface LoginResponse{
     accesToken: string,
     refreshToken: string

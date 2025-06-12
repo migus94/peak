@@ -52,12 +52,10 @@ const Cart = require('../models/Cart');
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Products'
- *       "401":
- *         description: Token faltante
  *       "500":
  *         description: Error de servidor
  */
-router.get('/', authenticate, async (req, res) => {
+router.get('/', async (req, res) => {
     const { search, minPrice, maxPrice, minRating } = req.query;
     const filters = {};
 
