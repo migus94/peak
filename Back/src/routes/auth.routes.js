@@ -154,10 +154,9 @@ router.post('/login', requiredFields(['email', 'password']), async (req, res) =>
         if (!match) return res.status(401).json({ error: 'Datos no validos' });
 
         const payload = { sub: user.id, roles: user.rol };
-        // TODO probar los tiempo de los tokens (expiresIn 1m)
         const accessToken = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '45m' });
         const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_KEY, { expiresIn: '2h' });
-        return res.json({ accessToken, refreshToken });
+        return res.json({ accessToken, refreshToken, payload });
     } catch (e) {
         console.error('Error en login', e);
         return res.status(500).json({ message: 'Error de servidor' })
@@ -212,5 +211,4 @@ router.post('/refresh', requiredFields(['refreshToken']), async (req, res) => {
     }
 });
 
-// TODO controles de parametros como email o password
 module.exports = router;

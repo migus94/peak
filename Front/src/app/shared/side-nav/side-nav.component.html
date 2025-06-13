@@ -1,6 +1,8 @@
 <aside class="side-nav">
     <ul>
-        <li><a routerLink="">Usuarios</a></li>
-        <li><a routerLink="">Productos</a></li>
+        @if(isAdmin()) {
+            <li><a routerLink="/admin/users" >Usuarios</a></li>
+            <li><a routerLink="/admin/products" >Productos</a></li>
+        }
     </ul>
 </aside>

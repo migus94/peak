@@ -5,7 +5,10 @@ export interface LoginRequest {
 
 export interface LoginResponse{
     accessToken: string,
-    refreshToken: string
+    refreshToken: string,
+    payload?: {
+        roles: 'USER' | 'ADMIN'
+    }
 }
 
 export interface RegisterRequest {

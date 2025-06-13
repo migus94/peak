@@ -11,5 +11,7 @@ import { MenubarModule } from 'primeng/menubar';
   styleUrl: './side-nav.component.scss'
 })
 export class SideNavComponent {
-
+  isAdmin(): boolean {
+    return localStorage.getItem('userRole') === 'ADMIN';
+  }
 }

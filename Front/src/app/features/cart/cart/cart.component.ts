@@ -27,7 +27,7 @@ export class CartComponent implements OnInit {
   this.cartService.updatecartItem(productId, isIncrease);
 }
 
-//TODO vaciar del carrito y añadir imagenes
+// TODO vaciar del carrito y añadir imagenes
 remove(productId: number) {
   this.cartService.updatecartItem(productId, false);
 }

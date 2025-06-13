@@ -52,7 +52,7 @@ export class LoginComponent {
     this.isLoading.set(true);
     const {email, password} = this.form.getRawValue();
 
-    this.authService.login(email, password). subscribe({
+    this.authService.login(email, password).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.formService.resetForm();

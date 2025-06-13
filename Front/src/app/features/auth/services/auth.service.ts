@@ -31,9 +31,10 @@ export class AuthService {
     return this.http
       .post<LoginResponse>(`${this.apiBase}${this.authRoutue}${this.loginRoutue}`, {email, password})
       .pipe(
-        tap(({ accessToken, refreshToken }) => {
+        tap(({ accessToken, refreshToken, payload }) => {
           this.setToken(accessToken);
           localStorage.setItem('refreshToken', refreshToken);
+          localStorage.setItem('userRole', payload?.roles ?? 'USER');
         })
       );
   }
@@ -67,6 +68,7 @@ export class AuthService {
     this._token.set(null);
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_KEY);
+    localStorage.removeItem('userRole');
   }
 
   logOut(): void {

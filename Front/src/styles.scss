@@ -1,5 +1,9 @@
 @use "sass:color";
 
+@use 'primeng/resources/themes/lara-light-blue/theme.css' as *;
+@use 'primeng/resources/primeng.min.css' as *;
+@use 'primeicons/primeicons.css' as *;
+
 @import url('https://fonts.googleapis.com/css2?family=Iceberg&display=swap');
 
 :root {
