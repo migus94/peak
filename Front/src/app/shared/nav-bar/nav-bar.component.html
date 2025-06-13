@@ -10,9 +10,12 @@
 
   <div class="right">
     @if (isLogged) {
-      <a routerLink="/cart" class="toolbar-link">
+      <button pButton class="toolbar-button cart-button" (click)="goToCart()">
         <i class="pi pi-shopping-cart"></i>
-      </a>
+        @if (cartCount() > 0) {
+          <span class="cart-badge">{{ cartCount() }}</span>
+        }
+      </button>
 
       <button
         pButton

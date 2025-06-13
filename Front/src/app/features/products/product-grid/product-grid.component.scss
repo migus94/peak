@@ -71,3 +71,9 @@ button {
     cursor: not-allowed;
   }
 }
+
+.product-rating {
+  margin-top: 0.25rem;
+  display: flex;
+  justify-content: flex-start;
+}

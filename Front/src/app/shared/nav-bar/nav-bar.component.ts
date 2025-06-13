@@ -1,26 +1,33 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { Component, ElementRef, HostListener, inject, OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { MenubarModule } from 'primeng/menubar';
 import { AuthService } from '../../features/auth/services/auth.service';
 import { MenuModule } from 'primeng/menu';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
+import { CartService } from '../../features/cart/services/cart.service';
 
 @Component({
   selector: 'app-nav-bar',
   standalone: true,
-  imports: [CommonModule, ToolbarModule, ButtonModule, MenuModule, RouterModule],
+  imports: [CommonModule, ToolbarModule, ButtonModule, MenuModule, RouterModule, NgIf],
   templateUrl: './nav-bar.component.html',
   styleUrl: './nav-bar.component.scss'
 })
 export class NavBarComponent {
 
-  private auth = inject(AuthService);
+  private authService = inject(AuthService);
+  private cartService = inject(CartService);
+  private router = inject(Router);
   private elementRef = inject(ElementRef);
 
-  isLogged = this.auth.isLoggedIn();
+  readonly cartCount = this.cartService.cartCount;
+
+  get isLogged() {
+    return this.authService.isLoggedIn();
+  } 
   showMenu = false;
 
   toggleMenu() {
@@ -28,7 +35,11 @@ export class NavBarComponent {
   }
 
   logout() {
-    this.auth.logOut();
+    this.authService.logOut();
+  }
+
+  goToCart() {
+    this.router.navigate(['/cart']);
   }
 
   @HostListener('document:click', ['$event'])

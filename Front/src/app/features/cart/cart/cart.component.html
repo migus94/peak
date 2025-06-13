@@ -1,1 +1,39 @@
-<p>cart works!</p>
+<div class="cart-container">
+  <div class="cart-title">
+    <h2>Mi cesta</h2>
+  </div>
+  <div class="cart-items">
+    @for (item of items(); track item.productId) {
+      <div class="cart-item">
+        <div class="item-details">
+          <h3>{{ item.title }}</h3>
+          <span class="unit-price">{{ item.price | currency: 'EUR' }}</span>
+        </div>
+        <div class="item-controls">
+          <div class="quantity-controls">
+            <button (click)="update(item.productId, false)">-</button>
+            <span>x{{ item.quantity }}</span>
+            <button (click)="update(item.productId, true)">+</button>
+          </div>
+          <div class="total-price">
+            {{ item.price * item.quantity | currency: 'EUR' }}
+          </div>
+          <button 
+            pButton 
+            class="remove-btn" 
+            (click)="remove(item.productId)"
+          >
+            Eliminar
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+  <div class="cart-summary">
+    <div class="summary-info">
+      <p>Subtotal: </p>
+      <strong>{{ totalPrice() | currency: 'EUR' }}</strong>
+    </div>
+    <button pButton class="checkout-btn" disabled>Comprar</button>
+  </div>
+</div>

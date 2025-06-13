@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
 
@@ -10,14 +10,17 @@ import { LoginRequest, LoginResponse, RefreshRequest, RegisterRequest, RegisterR
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly TOKEN_KEY = 'accesToken';
+  private readonly TOKEN_KEY = 'accessToken';
   private readonly REFRESH_KEY = 'refreshToken';
+  private _token = signal<string | null>(this.getToken());
   
   private readonly apiBase = '/api';
   private authRoutue = '/auth';
   private loginRoutue = '/login';
   private singUpRoutue = '/signup';
   private refreshRoutue = '/refresh';
+
+  isLoggedIn = computed(()=> !!this._token());
 
   constructor(
     private http: HttpClient,
@@ -28,9 +31,9 @@ export class AuthService {
     return this.http
       .post<LoginResponse>(`${this.apiBase}${this.authRoutue}${this.loginRoutue}`, {email, password})
       .pipe(
-        tap(({ accesToken, refreshToken }) => {
-          localStorage.setItem('accesToken', accesToken),
-          localStorage.setItem('refreshToken', refreshToken)
+        tap(({ accessToken, refreshToken }) => {
+          this.setToken(accessToken);
+          localStorage.setItem('refreshToken', refreshToken);
         })
       );
   }
@@ -43,14 +46,15 @@ export class AuthService {
     return this.http
       .post<LoginResponse>(`${this.apiBase}${this.authRoutue}${this.refreshRoutue}`, body)
       .pipe(
-        tap(({ accesToken, refreshToken }) => {
-          localStorage.setItem('accesToken', accesToken),
+        tap(({ accessToken, refreshToken }) => {
+          this.setToken(accessToken);
           localStorage.setItem('refreshToken', refreshToken)
         })
       );
   }
   
-  setToken(token: string): void {
+  setToken(token: string) {
+    this._token.set(token);
     localStorage.setItem(this.TOKEN_KEY, token);
   }
 
@@ -58,11 +62,9 @@ export class AuthService {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  isLoggedIn(): boolean {
-    return !!this.getToken();
-  }
 
   clearToken(): void {
+    this._token.set(null);
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_KEY);
   }

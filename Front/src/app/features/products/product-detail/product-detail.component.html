@@ -22,6 +22,7 @@
                     label=" + Añadir al carrito"
                     [disabled]="product()!.stock === 0"
                     class="add-to-cart-btn"
+                    (click)="addToCart(product()!.publicId)"
                 ></button>
             </div>
         </div>

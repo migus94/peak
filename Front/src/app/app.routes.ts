@@ -4,6 +4,8 @@ import { RegisterComponent } from './features/auth/register/register.component';
 import { ShowcaseComponent } from './features/showcase/showcase.component';
 import { ProductGridComponent } from './features/products/product-grid/product-grid.component';
 import { ProductDetailComponent } from './features/products/product-detail/product-detail.component';
+import { CartComponent } from './features/cart/cart/cart.component';
+import { AuthGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
     {path: 'login', component: LoginComponent},
@@ -14,6 +16,7 @@ export const routes: Routes = [
         children: [
             {path: '', component: ProductGridComponent},
             {path: 'product/:id', component: ProductDetailComponent},
+            {path: 'cart', component: CartComponent, canActivate: [AuthGuard]},
         ]
     },
     {path: '**', redirectTo: ''}
