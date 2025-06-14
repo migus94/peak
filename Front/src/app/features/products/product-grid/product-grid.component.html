@@ -2,7 +2,7 @@
     @for (product of products(); track product.publicId) {
         <div class="product-card">
             <img 
-                [src]="product.mainImage"
+                [src]="product.mainImage === 'DEFAULT' ? '/assets/images/default-product.svg' : product.mainImage"
                 (click)="goToDetail(product.publicId)"
             />
             <div class="product-info">

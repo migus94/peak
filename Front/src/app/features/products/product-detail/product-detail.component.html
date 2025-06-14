@@ -2,7 +2,10 @@
     @if (product() !== null) {
         <div class="product-card">
             <div class="image-section">
-                <img [src]="product()!.mainImage"/>
+                <img
+                    [src]="product()!.mainImage === 'DEFAULT' ? '/assets/images/default-product.svg' : product()!.mainImage"
+                    class="product-detail-image"
+                />
             </div>
     
             <div class="product-info">

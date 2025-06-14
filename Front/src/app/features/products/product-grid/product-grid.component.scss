@@ -1,6 +1,6 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
   background-color: #e0f7fa;
 }
@@ -17,10 +17,10 @@
 
 .product-card img {
   width: 100%;
-  height: 180px;
+  height: 450px;
   object-fit: cover;
   border-radius: 4px;
-  background-color: #f0f0f0;
+  background-color: #ffffff;
 }
 
 .product-info {
@@ -76,4 +76,11 @@ button {
   margin-top: 0.25rem;
   display: flex;
   justify-content: flex-start;
+}
+
+.product-image, .product-detail-image {
+  width: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  height: 5000px;
 }
