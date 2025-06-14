@@ -1,12 +1,12 @@
 <div class="users">
-    <h2>Uusuarios</h2>
+    <h2>Usuarios</h2>
     @if (users.length > 0) {
         <p-table [value]="users" [stripedRows]="true" [responsiveLayout]="'scroll'" styleClass="p-datatable-sm">
             <ng-template pTemplate="header">
                 <tr>
                 <th>Nombre</th>
                 <th>Email</th>
-                <th>Rol</th>
+                <th>Role</th>
                 <th>Acciones</th>
                 </tr>
             </ng-template>
@@ -14,16 +14,24 @@
                 <tr>
                 <td>{{ user.name }}</td>
                 <td>{{ user.email }}</td>
-                <td>{{ user.role }}</td>
+                <td (click)="changeRole(user.publicId)" class="clickable-role">{{ user.rol }}</td>
                 <td>
                     <button 
                         pButton 
                         type="button" 
                         label="Eliminar" 
                         severity="danger" 
-                        (click)="deleteUser(user.id)"
+                        (click)="deleteUser(user.publicId)"
                         class="p-button-sm">
                     </button>
+                    <button 
+                        pButton 
+                        type="button" 
+                        icon="pi pi-pencil" 
+                        class="warning-btn" 
+                        disable="true"
+                        label="Editar"
+                    ></button>
                 </td>
                 </tr>
             </ng-template>

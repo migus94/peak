@@ -10,6 +10,7 @@ export class UserService {
   private http = inject(HttpClient);
   private readonly apiBase = '/api';
   private readonly userUrl = '/users';
+  private readonly rolUrl = '/rol';
 
   getUsers(): Observable<User[]> {
     return this.http.get<User[]>(`${this.apiBase}${this.userUrl}`);
@@ -18,4 +19,10 @@ export class UserService {
   deleteUser(id: string): Observable<any> {
     return this.http.delete(`${this.apiBase}${this.userUrl}/${id}`);
   }
+
+
+  changeUserRole(userId: number) {
+    return this.http.patch(`${this.apiBase}${this.userUrl}/${userId}${this.rolUrl}`, {});
+  }
+
 }

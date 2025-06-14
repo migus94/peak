@@ -387,7 +387,7 @@ router.delete('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async
             { 'items.productId': publicId },
             { $pull: { items: { productId: publicId } } }
         )
-        return res.status(204)
+        return res.status(204).json({ message: `Producto: ${publicId} eliminado` })
     } catch (e) {
         console.error(`Error eliminando el producto ${publicId}`, e);
         return res.status(500).json({ message: 'Error de servidor' });

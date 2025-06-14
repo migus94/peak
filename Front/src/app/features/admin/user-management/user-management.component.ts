@@ -21,10 +21,15 @@ export class UserManagementComponent {
   }
 
   loadUsers() {
-    this.userService.getUsers().subscribe(users => this.users = users);
+    this.userService.getUsers().subscribe(users => {this.users = users});
   }
 
   deleteUser(id: string) {
     this.userService.deleteUser(id).subscribe(() => this.loadUsers());
   }
+
+  changeRole(id: number) {
+    this.userService.changeUserRole(id).subscribe(() => this.loadUsers());
+  }
+
 }
