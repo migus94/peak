@@ -153,7 +153,7 @@ router.post('/login', requiredFields(['email', 'password']), async (req, res) =>
         const match = await bcrypt.compare(password, user.passwordHash);
         if (!match) return res.status(401).json({ error: 'Datos no validos' });
 
-        const payload = { sub: user.id, roles: user.rol };
+        const payload = { sub: user.id, publicId: user.publicId, roles: user.rol };
         const accessToken = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '45m' });
         const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_KEY, { expiresIn: '2h' });
         return res.json({ accessToken, refreshToken, payload });

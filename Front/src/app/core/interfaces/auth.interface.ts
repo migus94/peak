@@ -7,7 +7,8 @@ export interface LoginResponse{
     accessToken: string,
     refreshToken: string,
     payload?: {
-        roles: 'USER' | 'ADMIN'
+        roles: 'USER' | 'ADMIN',
+        publicId: number
     }
 }
 

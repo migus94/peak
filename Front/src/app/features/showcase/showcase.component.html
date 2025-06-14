@@ -1,7 +1,8 @@
-<app-nav-bar></app-nav-bar>
+<app-nav-bar (openAccount)="showMyAccount = true"></app-nav-bar>
 <div class="showcase">
     <app-side-nav></app-side-nav>
     <main>
         <router-outlet></router-outlet>
     </main>
 </div>
+<app-my-account [visible]="showMyAccount"(close)="showMyAccount = false"/>

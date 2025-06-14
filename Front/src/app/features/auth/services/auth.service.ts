@@ -19,6 +19,8 @@ export class AuthService {
   private loginRoutue = '/login';
   private singUpRoutue = '/signup';
   private refreshRoutue = '/refresh';
+  private usersRoutue = '/users';
+  private passwordRoutue = '/password';
 
   isLoggedIn = computed(()=> !!this._token());
 
@@ -35,12 +37,18 @@ export class AuthService {
           this.setToken(accessToken);
           localStorage.setItem('refreshToken', refreshToken);
           localStorage.setItem('userRole', payload?.roles ?? 'USER');
+          localStorage.setItem('userId', String(payload?.publicId ?? ''))
         })
       );
   }
 
   register(payload: RegisterRequest) {
     return this.http.post<RegisterResponse>(`${this.apiBase}${this.authRoutue}${this.singUpRoutue}`, payload);
+  }
+
+  changePassword(id: number ,oldPassword: string, newPassword: string) {
+    const payload = { oldPassword, newPassword };
+    return this.http.patch(`${this.apiBase}${this.usersRoutue}/${id}${this.passwordRoutue}`, payload);
   }
 
   refreshToken(body: RefreshRequest) {

@@ -1,8 +1,5 @@
 <p-toolbar class="navbar-toolbar">
   <div class="left">
-    <a routerLink="/" class="toolbar-link">
-      <i class="pi pi-home"></i> Inicio
-    </a>
     <a routerLink="/products" class="toolbar-link">
       <i class="pi pi-tags"></i> Productos
     </a>
@@ -31,7 +28,7 @@
           class="custom-dropdown"
           (click)="$event.stopPropagation()"
         >
-          <a routerLink="/profile"><i class="pi pi-cog"></i> Mi cuenta</a>
+          <a (click)="showMyAccount()"><i class="pi pi-cog"></i> Mi cuenta</a>
           <a (click)="logout()"><i class="pi pi-sign-out"></i> Cerrar sesión</a>
         </div>
       }

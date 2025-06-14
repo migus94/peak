@@ -1,5 +1,5 @@
 import { CommonModule, NgIf } from '@angular/common';
-import { Component, ElementRef, HostListener, inject, OnInit } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, inject, OnInit, Output } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { MenubarModule } from 'primeng/menubar';
@@ -17,6 +17,7 @@ import { CartService } from '../../features/cart/services/cart.service';
   styleUrl: './nav-bar.component.scss'
 })
 export class NavBarComponent {
+  @Output() openAccount = new EventEmitter<void>();
 
   private authService = inject(AuthService);
   private cartService = inject(CartService);
@@ -24,6 +25,7 @@ export class NavBarComponent {
   private elementRef = inject(ElementRef);
 
   readonly cartCount = this.cartService.cartCount;
+
 
   get isLogged() {
     return this.authService.isLoggedIn();
@@ -40,6 +42,10 @@ export class NavBarComponent {
 
   goToCart() {
     this.router.navigate(['/cart']);
+  }
+
+  showMyAccount() {
+    this.openAccount.emit()
   }
 
   @HostListener('document:click', ['$event'])
