@@ -25,7 +25,7 @@ export class AuthInterceptor implements HttpInterceptor {
     let cloned = req
     if (token) {
       cloned = req.clone({
-        setHeaders: {Autorizattion: `Bearer ${token}` }
+        setHeaders: {Authorization: `Bearer ${token}` }
       });
     }
     return next.handle(cloned).pipe(
@@ -40,11 +40,12 @@ export class AuthInterceptor implements HttpInterceptor {
           return this.http.post<LoginResponse>(`${enviroment.apiUrl}${this.authRoutue}${this.refreshRoutue}`, body)
             .pipe(
               switchMap( res => {
+                this.authService.setToken(res.accessToken);
                 this.authService.setToken(res.refreshToken);
                 localStorage.setItem(this.REFRESH_KEY, res.refreshToken);
                 const retryReq = req.clone({
                   setHeaders: {
-                    Autorization: `Bearer ${res.accesToken}`
+                    Authorization: `Bearer ${res.accessToken}`
                   }
                 });
                 return next.handle(retryReq);

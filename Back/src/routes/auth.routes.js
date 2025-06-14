@@ -147,17 +147,16 @@ router.post('/signup', requiredFields(['name', 'email', 'password']), async (req
 router.post('/login', requiredFields(['email', 'password']), async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email: email ? email.toLowerCase() : email });
+        const user = await User.findOne({ email: email?.toLowerCase() });
         if (!user) return res.status(401).json({ error: 'Datos no validos' });
 
         const match = await bcrypt.compare(password, user.passwordHash);
         if (!match) return res.status(401).json({ error: 'Datos no validos' });
 
-        const payload = { sub: user.id, roles: user.rol };
-        // TODO probar los tiempo de los tokens (expiresIn 1m)
+        const payload = { sub: user.id, publicId: user.publicId, roles: user.rol };
         const accessToken = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '45m' });
         const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_KEY, { expiresIn: '2h' });
-        return res.json({ accessToken, refreshToken });
+        return res.json({ accessToken, refreshToken, payload });
     } catch (e) {
         console.error('Error en login', e);
         return res.status(500).json({ message: 'Error de servidor' })
@@ -212,5 +211,4 @@ router.post('/refresh', requiredFields(['refreshToken']), async (req, res) => {
     }
 });
 
-// TODO controles de parametros como email o password
 module.exports = router;

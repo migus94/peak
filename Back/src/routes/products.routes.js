@@ -52,12 +52,10 @@ const Cart = require('../models/Cart');
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Products'
- *       "401":
- *         description: Token faltante
  *       "500":
  *         description: Error de servidor
  */
-router.get('/', authenticate, async (req, res) => {
+router.get('/', async (req, res) => {
     const { search, minPrice, maxPrice, minRating } = req.query;
     const filters = {};
 
@@ -130,14 +128,12 @@ router.get('/', authenticate, async (req, res) => {
  *               $ref: '#/components/schemas/Products'
  *       "400":
  *         description: Formato de id no valido
- *       "401":
- *         description: Token faltante
  *       "404":
  *         description: Producto no encontrado
  *       "500":
  *         description: Error de servidor
  */
-router.get('/:id', validateInt('id'), authenticate, async (req, res) => {
+router.get('/:id', validateInt('id'), async (req, res) => {
     const publicId = req.params.id;
 
     try {
@@ -391,7 +387,7 @@ router.delete('/:id', validateInt('id'), authenticate, authorize('ADMIN'), async
             { 'items.productId': publicId },
             { $pull: { items: { productId: publicId } } }
         )
-        return res.status(204)
+        return res.status(204).json({ message: `Producto: ${publicId} eliminado` })
     } catch (e) {
         console.error(`Error eliminando el producto ${publicId}`, e);
         return res.status(500).json({ message: 'Error de servidor' });

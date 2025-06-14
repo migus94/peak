@@ -1,0 +1,27 @@
+<div class="grid">
+    @for (product of products(); track product.publicId) {
+        <div class="product-card">
+            <img 
+                [src]="product.mainImage === 'DEFAULT' ? '/assets/images/default-product.svg' : product.mainImage"
+                (click)="goToDetail(product.publicId)"
+            />
+            <div class="product-info">
+                <h3 
+                    class="product-title"
+                    (click)="goToDetail(product.publicId)"
+                >{{ product.title }}</h3>
+                <div class="product-rating">
+                    <p-rating [readonly]="true" [ngModel]="product.rating"></p-rating>
+                </div>
+                <div class="product-details">
+                    <p class="stock">stock: {{product.stock}}</p>
+                    <p class="price">{{ product.price | currency:'EUR' }}</p>
+                    <button 
+                        [disabled]="product.stock === 0"
+                        (click)="addToCart(product.publicId)"    
+                    >Añadir +</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>

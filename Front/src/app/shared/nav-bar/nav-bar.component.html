@@ -1,4 +1,44 @@
-<p-menubar
-    [model]="items"
-    styleClass="navbar-pimenubar"
-/>
+<p-toolbar class="navbar-toolbar">
+  <div class="left">
+    <a routerLink="/products" class="toolbar-link">
+      <i class="pi pi-tags"></i> Productos
+    </a>
+  </div>
+
+  <div class="right">
+    @if (isLogged) {
+      <button pButton class="toolbar-button cart-button" (click)="goToCart()">
+        <i class="pi pi-shopping-cart"></i>
+        @if (cartCount() > 0) {
+          <span class="cart-badge">{{ cartCount() }}</span>
+        }
+      </button>
+
+      <button
+        pButton
+        type="button"
+        icon="pi pi-user"
+        label="Perfil"
+        class="toolbar-button"
+        (click)="toggleMenu()"
+      ></button>
+
+      @if (showMenu) {
+        <div
+          class="custom-dropdown"
+          (click)="$event.stopPropagation()"
+        >
+          <a (click)="showMyAccount()"><i class="pi pi-cog"></i> Mi cuenta</a>
+          <a (click)="logout()"><i class="pi pi-sign-out"></i> Cerrar sesión</a>
+        </div>
+      }
+    } @else {
+      <a routerLink="/login" class="toolbar-link">
+        <i class="pi pi-sign-in"></i> Login
+      </a>
+      <a routerLink="/register" class="toolbar-link">
+        <i class="pi pi-user-plus"></i> Registro
+      </a>
+    }
+  </div>
+</p-toolbar>

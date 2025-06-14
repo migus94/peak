@@ -1,5 +1,5 @@
 <div class="login">
-    <h1 class="login--title">Inicio de sesión</h1>
+    <h1 class="login--title">ACCEDER</h1>
     <form 
         [formGroup]="form"
         (ngSubmit)="login()"
@@ -52,9 +52,12 @@
                 Enviar
             }
         </button>
-        {{!canSubmit()}}
-        {{isLoading()}}
 
+        <div class="register-link">
+            ¿No tienes cuenta?
+            <a routerLink="/register">Regístrate aquí</a>
+        </div>
+        
         @if (errorMsg()) {
             <div class="error">{{ errorMsg() }}</div>
         }

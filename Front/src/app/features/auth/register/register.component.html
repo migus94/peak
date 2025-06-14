@@ -14,7 +14,7 @@
                 formControlName="name"
                 class="input"
                 [class.invalid]="form.controls['name'].invalid && form.controls['name'].touched"
-                placeholder="Nombre completo..."
+                placeholder="Nombre..."
             />
             @if (form.controls['name'].touched && form.controls['name'].hasError('required')) {
             <div class="error">El nombre es necesario</div>
@@ -68,6 +68,11 @@
                 Registrar
             }
         </button>
+
+        <div class="login-link">
+            ¿Ya tienes cuenta?
+            <a routerLink="/login">Ingresa aqui</a>
+        </div>
 
         @if (errorMsg()) {
             <div class="error">{{ errorMsg() }}</div>

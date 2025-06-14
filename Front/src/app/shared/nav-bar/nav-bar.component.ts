@@ -1,69 +1,58 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { CommonModule, NgIf } from '@angular/common';
+import { Component, ElementRef, EventEmitter, HostListener, inject, OnInit, Output } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { MenubarModule } from 'primeng/menubar';
 import { AuthService } from '../../features/auth/services/auth.service';
+import { MenuModule } from 'primeng/menu';
+import { ToolbarModule } from 'primeng/toolbar';
+import { ButtonModule } from 'primeng/button';
+import { CartService } from '../../features/cart/services/cart.service';
 
 @Component({
   selector: 'app-nav-bar',
   standalone: true,
-  imports: [CommonModule, MenubarModule, RouterModule],
+  imports: [CommonModule, ToolbarModule, ButtonModule, MenuModule, RouterModule, NgIf],
   templateUrl: './nav-bar.component.html',
   styleUrl: './nav-bar.component.scss'
 })
 export class NavBarComponent {
-  items: MenuItem[] = [];
+  @Output() openAccount = new EventEmitter<void>();
 
-  private auth: AuthService = inject(AuthService);
+  private authService = inject(AuthService);
+  private cartService = inject(CartService);
+  private router = inject(Router);
+  private elementRef = inject(ElementRef);
 
-  private buildMenu() {
-    this.items = [
-      {
-        label: 'Inicio',
-        icon: 'pi pi-home',
-        routerLink: ['/']
-      },
-      {
-        label: 'Productos',
-        icon: 'pi pi-tags',
-        routerLink: ['/products']
-      },
-      {
-        label: 'Carrito',
-        icon: 'pi pi-shopping-cart',
-        routerLink: ['/cart']
-      },
-      {
-        label: 'Perfil',
-        icon: 'pi pi-user',
-        routerLink: ['/user'],
-        visible: this.auth.isLoggedIn(),
-        items: [
-          {
-            label: 'Mi cuenta',
-            icon: 'pi pi-cog',
-            routerLink: ['/profile']
-          },
-          {
-            label: 'Cerrar sesión',
-            icon: 'pi pi-sing-out',
-            comand: () => this.auth.logOut()
-          }
-        ]
-      },
-      {
-        label: 'Login',
-        icon: 'pi pi-sing-in',
-        routerLink: ['/login'],
-        visible: !this.auth.isLoggedIn()
-      },
-      {
-        label: 'Registro',
-        icon: 'pi pi-user-plus',
-        routerLink: ['/register'],
-        visible: !this.auth.isLoggedIn()
-      }
-    ]
+  readonly cartCount = this.cartService.cartCount;
+
+
+  get isLogged() {
+    return this.authService.isLoggedIn();
+  } 
+  showMenu = false;
+
+  toggleMenu() {
+    this.showMenu = !this.showMenu;
+  }
+
+  logout() {
+    this.authService.logOut();
+  }
+
+  goToCart() {
+    this.router.navigate(['/cart']);
+  }
+
+  showMyAccount() {
+    this.openAccount.emit()
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleOutsideClick(event: MouseEvent) {
+    const clickedInside = this.elementRef.nativeElement.contains(event.target);
+    if (!clickedInside) {
+      this.showMenu = false;
+    }
   }
 }

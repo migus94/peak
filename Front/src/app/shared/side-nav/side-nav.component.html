@@ -1,1 +1,8 @@
-<p>side-nav works!</p>
+<aside class="side-nav">
+    <ul>
+        @if(isAdmin()) {
+            <li><a routerLink="/admin/users" >Usuarios</a></li>
+            <li><a routerLink="/admin/products" >Productos</a></li>
+        }
+    </ul>
+</aside>

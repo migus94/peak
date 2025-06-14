@@ -277,7 +277,7 @@ router.delete('/:id', validateInt('id'), authenticate, async (req, res) => {
  *         description: Error de servidor
  */
 router.put('/:id', validateInt('id'), authenticate, async (req, res) => {
-    const productId = req.params.id;
+    const productId = Number(req.params.id);
     const { isIncrease } = req.body;
 
     if (typeof isIncrease !== 'boolean') {
@@ -288,48 +288,52 @@ router.put('/:id', validateInt('id'), authenticate, async (req, res) => {
     const delta = isIncrease ? 1 : -1;
 
     try {
-
-        const cart = await Cart.findOne({ userId: req.userId });
-        const cartItem = cart.items.find(item => item.productId === productId)
-        if (!cart || !cartItem) {
-            return res.status(404).json({
-                message: `Producto ${productId} o carrito no encontrado`
+        const product = await Products.findOne({ publicId: productId });
+        if (!product) {
+            return res.status(404).json({ 
+                message: `Producto ${productId} no encontrado` 
             });
         }
 
-        if (isIncrease) {
-            const product = await Products.findOne({ publicId: productId });
-            if (!product) {
-                return res.status(404).json({ message: `Producto ${productId} no encontrado` });
-            }
-            if (cartItem.quantity + 1 > product.stock) {
-                return res.status(404).json({
-                    message: `Stock insuficiente del producto ${productId}`
-                });
+        let cart = await Cart.findOne({ userId: req.userId });
+        if (!cart) {
+            cart = await Cart.create({ userId: req.userId, items: [] });
+        }
+        const existingItem = cart.items.find(item => item.productId === productId);
+
+        if (existingItem) {
+            if (isIncrease) {
+                if (existingItem.quantity + 1 > product.stock) {
+                    return res.status(400).json({
+                        message: `No hay suficiente stock disponible` 
+                    });
+                }
+                existingItem.quantity += 1;
+            } else {
+                existingItem.quantity -= 1;
+                if (existingItem.quantity <= 0) {
+                    cart.items = cart.items.filter(
+                        item => item.productId !== productId
+                    );
+                }
             }
         }
-
-        const updatedCart = await Cart.findOneAndUpdate(
-            { userId: req.userId, 'items.productId': productId },
-            { $inc: { 'items.$.quantity': delta } },
-            { new: true }
-        );
-
-        const updatedItem = updatedCart.items.find(item => item.productId === productId);
-        if (updatedItem.quantity <= 0) {
-            const cartDeleted = await Cart.findOneAndUpdate(
-                { userId: req.userId },
-                { $pull: { items: { productId } } },
-                { new: true }
-            );
-            return res.json(cartDeleted);
+        
+        else if (isIncrease) {
+            cart.items.push({ productId, quantity: 1 });
+        } else {
+            return res.status(400).json({ 
+                message: `stock insuficiente del producto ${productId}` 
+            });
         }
 
-        return res.json(updatedCart);
+        await cart.save();
+        return res.json(cart);
+
     } catch (e) {
         console.error(`Error al actualizar producto ${productId}`, e);
         return res.status(500).json({ message: 'Error de servidor' });
-    };
+    }
 });
 
 /**

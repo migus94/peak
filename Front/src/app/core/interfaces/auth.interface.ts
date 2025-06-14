@@ -3,10 +3,13 @@ export interface LoginRequest {
     password: string
 }
 
-//tambien para la respuesta de refresh
 export interface LoginResponse{
-    accesToken: string,
-    refreshToken: string
+    accessToken: string,
+    refreshToken: string,
+    payload?: {
+        roles: 'USER' | 'ADMIN',
+        publicId: number
+    }
 }
 
 export interface RegisterRequest {

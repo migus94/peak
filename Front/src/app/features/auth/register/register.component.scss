@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Iceberg&display=swap');
+
+.register {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 2rem;
+  background: #e0f7fa;
+  font-family: 'Iceberg', 'Helvetica Neue', Arial, sans-serif;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  &--title {
+    text-align: center;
+    font-size: 4rem;
+    margin-bottom: 2rem;
+    color: #01579b;
+  }
+
+  &--form {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    .form-group {
+      margin-bottom: 1.25rem;
+      width: 100%;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #0277bd;
+    }
+
+    input {
+      width: 100%;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem ;
+      border: 1px solid #81d4fa;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+
+      &:focus {
+        border-color: #0288d1;
+        outline: none;
+      }
+
+      &.invalid {
+        border-color: #d32f2f;
+      }
+    }
+
+    .error {
+      margin-top: 0.5rem;
+      color: #d32f2f;
+      font-size: 0.875rem;
+    }
+
+    .btn {
+      display: inline-block;
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 4px;
+      border: none;
+      transition: background-color 0.2s;
+      margin-top: 1rem;
+
+      &-primary {
+        background: #0288d1;
+        color: #fff;
+
+        &:disabled {
+          background: #81d4fa;
+          cursor: not-allowed;
+        }
+
+        &:not(:disabled):hover {
+          background: #0277bd;
+        }
+      }
+    }
+  }
+}
+
+.login-link {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #01579b;
+
+  a {
+    color: #0288d1;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 0.25rem;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

@@ -1,0 +1,18 @@
+:host {
+  display: flex;
+  flex-direction: column; /* navbar arriba */
+  min-height: 100vh;
+  background-color: var(--color-background);
+}
+
+.showcase {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+main {
+  flex: 1;
+  background-color: var(--color-background);
+  padding: 2rem;
+}
