@@ -23,10 +23,6 @@ export class CartService {
 
   readonly items = this.cartItems.asReadonly();
 
-  constructor() {
-
-  }
-
   initCart() {
     this.http.get<{ items: CartItem[] }>(`${this.apiBase}${this.cartRoute}`).pipe(
       map(res => res.items ?? []),

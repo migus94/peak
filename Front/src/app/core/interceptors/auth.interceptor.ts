@@ -9,12 +9,8 @@ import { enviroment } from '../../../enviroment/enviroment';
 export class AuthInterceptor implements HttpInterceptor {
   private authService = inject(AuthService);
   private http = inject(HttpClient);
-  private readonly TOKEN_KEY = 'accesToken';
   private readonly REFRESH_KEY = 'refreshToken';
-
   private authRoutue = '/auth';
-  private loginRoutue = '/login';
-  private singUpRoutue = '/singUp';
   private refreshRoutue = '/refresh';
   
   intercept(
