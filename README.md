@@ -13,9 +13,9 @@
 
 1. [Introducción](#1-introducción-1-página)  
 2. [Especificación de Requisitos](#2-especificación-de-requisitos)  
-3. [Diseño (Diagramas)](#3-diseño-diagramas)  
-4. [Implementación (GIT)](#4-implementación-git)  
-5. [Resultado (Manual de usuario)](#5-resultado-manual-de-usuario)  
+3. [Diseño](#3-diseño)  
+4. [Implementación](#4-implementación)  
+5. [Resultado](#5-resultado)  
 6. [Conclusiones](#6-conclusiones)  
 
 ---
@@ -60,8 +60,7 @@ El sistema incluye: visualizacion para usuarios no registrados, funcionalidades 
 
 ---
 
-## 3. Diseño (Diagramas)
-
+## 3. Diseño
 - **Casos de uso**: 
 
 <img src="Front/src/assets/images/DiagramaUso.png" alt="caso de uso" width="700"/>
@@ -75,7 +74,7 @@ El sistema incluye: visualizacion para usuarios no registrados, funcionalidades 
 
 ---
 
-## 4. Implementación (GIT)
+## 4. Implementación
 
 ### Diagrama de arquitectura
 
