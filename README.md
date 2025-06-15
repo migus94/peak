@@ -66,16 +66,12 @@ El sistema incluye: visualizacion para usuarios no registrados, funcionalidades 
 
 <img src="Front/src/assets/images/DiagramaUso.png" alt="caso de uso" width="700"/>
   
-- **Diagrama entidad-relación**:
-  - Ahora vemos el esquema lógico de los documentos en una base de datos MongoDB, en la que no se utilizan claves foráneas estrictas. Las relaciones se mantienen mediante identificadores (`publicId`), ofreciendo una estructura simple adaptada a nuestra arquitectura REST
-    
- <img src="Front/src/assets/images/esquemaBBDD.png" alt="esquema BBDD" width="700"/>
+- **Diagrama entidad-relación (BBDD no relacional)**:
+  Base de datos MongoDB, en la que no se utilizan claves foráneas estrictas. Las relaciones se mantienen mediante identificadores (`publicId`), ofreciendo una estructura simple adaptada a nuestra arquitectura REST
+  
 
-- **Esquema MongoDB**:
-  - Colecciones: Users, Products, Carts
 - **Diagrama de clases (modelo)**:
-  - User, Product, Cart, AuthRequest, Comment
-- *(Opcional)* Diagrama de secuencia: Flujo compra / autenticación
+  <img src="Front/src/assets/images/UML.png" alt="UML" width="700"/>
 
 ---
 
