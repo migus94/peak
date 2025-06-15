@@ -62,9 +62,15 @@ El sistema incluye: visualizacion para usuarios no registrados, funcionalidades 
 
 ## 3. Diseño (Diagramas)
 
-- **Casos de uso**: Compra de producto, gestión de stock, autenticación
+- **Casos de uso**: 
+
+<img src="Front/src/assets/images/DiagramaUso.png" alt="caso de uso" width="700"/>
+  
 - **Diagrama entidad-relación**:
-  - Usuario ↔ Carrito ↔ Productos
+  - Ahora vemos el esquema lógico de los documentos en una base de datos MongoDB, en la que no se utilizan claves foráneas estrictas. Las relaciones se mantienen mediante identificadores (`publicId`), ofreciendo una estructura simple adaptada a nuestra arquitectura REST
+    
+ <img src="Front/src/assets/images/esquemaBBDD.png" alt="esquema BBDD" width="700"/>
+
 - **Esquema MongoDB**:
   - Colecciones: Users, Products, Carts
 - **Diagrama de clases (modelo)**:
